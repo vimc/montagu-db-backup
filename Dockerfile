@@ -1,5 +1,3 @@
-# It's not totally obvious if it's better here to base this off of
-# postgres:9.6 or off of ubuntu.
 FROM ubuntu:16.04
 
 RUN apt-get update && \
