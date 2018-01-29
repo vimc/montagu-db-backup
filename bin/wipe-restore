@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+DEST=/restore
+shopt -s dotglob
+rm -rf /restore/*
