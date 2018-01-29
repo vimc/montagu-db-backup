@@ -15,7 +15,7 @@ def setup():
     write_pgpass(conf)
     for x in conf:
         test_connections(x)
-    write_barman_start()
+    initial_backup(conf)
 
 def write_pgpass(dat):
     template = "{host}:{port}:{dbname}:{user_backup}:{pass_backup}\n" \
@@ -58,11 +58,6 @@ def basename_no_ext(path):
 def filter_dict(d, prefix):
     return {k: v for k, v in d.items() if k.startswith(prefix)}
 
-def write_barman_start():
-    barman_start = os.environ['BARMAN_START']
-    with open(barman_start, "w") as f:
-        f.write("")
-
 def test_connections(dat):
     args1 = ["psql", "-h", dat['host'], "-p", str(dat['port']), "-w",
              "-U", dat['user_backup'], "-d", dat['dbname'],
@@ -75,6 +70,30 @@ def test_connections(dat):
     r1 = subprocess.run(args1, check = True)
     print("...Checking replication user")
     r2 = subprocess.run(args2, check = True)
+
+def initial_backup(conf):
+    print("Running 'barman cron'")
+    subprocess.run(["barman", "cron"], check = True)
+    for x in conf:
+        nm = x['configuration_name']
+        force_archive(nm)
+        print("Running initial backup of {}".format(nm))
+        subprocess.run(["barman", "backup", nm], check = True)
+        print("Checking barman status of {}".format(nm))
+        subprocess.run(["barman", "check", nm], check = True)
+
+# This seems a bit flakey to archive but usually runs just fine the
+# second time.  So this is set up within a set of retries
+def force_archive(name, attempts=5):
+    args = ["barman", "switch-xlog", "--force", "--archive", name]
+    for i in range(attempts):
+        print("Trying to force server to a WAL file (attempt {}/{})".format(
+            i + 1, attempts))
+        res = subprocess.run(args)
+        if res.returncode == 0:
+            print("Success!")
+            return
+    raise Exception("Failed to start log archiving for {}".format(name))
 
 if __name__ == "__main__":
     setup()
