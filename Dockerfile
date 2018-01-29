@@ -1,7 +1,13 @@
 FROM ubuntu:16.04
 
 RUN apt-get update && \
-        apt-get install -y wget
+        apt-get install -y --no-install-recommends \
+                python3-pip \
+                python3-setuptools \
+                wget
+
+RUN pip3 install --upgrade pip &&\
+        pip3 install docopt
 
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
         apt-key add - && \

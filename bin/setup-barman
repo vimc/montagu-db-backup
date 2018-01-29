@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+"""Deploy montagu
+
+Usage:
+  setup-barman [--no-verify]
+
+Options:
+  --no-verify   Set up configuration files only, don't connect to server
+"""
+import docopt
 import glob
 import json
 import os
@@ -7,15 +16,16 @@ import string
 import subprocess
 from subprocess import PIPE
 
-def setup():
+def setup(verify = False):
     files = glob.glob("/etc/barman.d.in/*.json")
     conf = [read_barman_conf(x) for x in files]
     for x in conf:
         write_barman_conf(x)
     write_pgpass(conf)
-    for x in conf:
-        test_connections(x)
-    initial_backup(conf)
+    if verify:
+        for x in conf:
+            test_connections(x)
+        initial_backup(conf)
 
 def write_pgpass(dat):
     template = "{host}:{port}:{dbname}:{user_backup}:{pass_backup}\n" \
@@ -101,4 +111,6 @@ def force_archive(name, attempts=5):
     raise Exception("Failed to start log archiving for {}".format(name))
 
 if __name__ == "__main__":
-    setup()
+    args = docopt.docopt(__doc__)
+    verify = not args["--no-verify"]
+    setup(verify)
