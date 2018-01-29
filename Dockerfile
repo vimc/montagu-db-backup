@@ -11,8 +11,6 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
                 barman \
                 postgresql-client-9.6
 
-ENV PGPASSFILE=/var/run/barman/etc/pgpass
-VOLUME /var/run/barman/etc
 VOLUME /var/lib/barman
 
 COPY etc /etc

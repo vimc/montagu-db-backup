@@ -37,7 +37,6 @@ docker run -d --rm \
        --name barman \
        --network pg_nw \
        -v barman_data:/var/lib/barman \
-       -v barman_etc:/var/run/barman/etc \
        -v barman_restore:/restore \
        docker.montagu.dide.ic.ac.uk:5000/montagu-barman:i1333
 
