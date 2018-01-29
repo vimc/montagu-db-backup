@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+import os
+import os.path
+import time
+import glob
+import subprocess
+
+class BackupServer(object):
+    def __init__(self, server):
+        args = ["barman", "receive-wal", server]
+        self.log = open("/var/log/barman_xlog_{}.log".format(server), "wb")
+        self.process = subprocess.Popen(args, stdout=self.log, stderr=self.log)
+    def is_alive(self):
+        return self.process.poll() is None
+    def cleanup(self):
+        self.process.kill()
+        self.log.close()
+
+def wait(barman_start, timeout=3600, poll=10):
+    print("Waiting for go signal at {}".format(barman_start))
+    for i in range(timeout * poll):
+        if os.path.exists(barman_start):
+            print("Receied go signal: starting wal receiver")
+            return
+        time.sleep(1 / poll)
+        if i % (5 * poll) == 0:
+            print("...still waiting ({} s)".format(i / 10))
+    raise Error("go signal not returned in time")
+
+def start_wal_receiver(server):
+    log = open("/var/log/barman_xlog_{}.log".format(server), "wb")
+    args = ["barman", "receive-wal", server]
+    p = subprocess.Popen(args, stdout=log, stderr=log)
+    return {'process': p, 'log': log}
+
+def run():
+    wait(os.environ["BARMAN_START"])
+    servers = [basename_no_ext(f) for f in glob.glob("/etc/barman.d/*.conf")]
+    p = [BackupServer(s) for s in servers]
+    try:
+        for s in servers:
+            force_archive(s)
+        while all(s.is_alive() for s in p):
+            time.sleep(1)
+    finally:
+        [s.cleanup() for s in p]
+
+def basename_no_ext(path):
+    return os.path.splitext(os.path.basename(path))[0]
+
+# This seems a bit flakey to archive but usually runs just fine the
+# second time.  So this is set up within a set of retries
+def force_archive(name, attempts=5):
+    args = ["barman", "switch-xlog", "--force", "--archive", name]
+    for i in range(attempts):
+        print("Trying to force server to a WAL file (attempt {}/{})".format(
+            i + 1, attempts))
+        res = subprocess.run(args)
+        if res.returncode == 0:
+            print("Success!")
+            return
+    raise Exception("Failed to start log archiving for {}".format(name))
+
+if __name__ == "__main__":
+    run()

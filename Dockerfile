@@ -18,4 +18,4 @@ COPY bin /usr/local/bin
 
 VOLUME /var/lib/barman
 
-ENTRYPOINT ["bash"]
+ENTRYPOINT ["entrypoint_barman"]
