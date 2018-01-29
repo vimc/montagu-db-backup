@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# This just makes sleep inf interruptable from docker
+cleanup () {
+  kill -s SIGTERM $!
+  exit 0
+}
+trap cleanup SIGINT SIGTERM
+
+sleep inf &
+wait $!

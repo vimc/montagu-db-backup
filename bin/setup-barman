@@ -21,7 +21,7 @@ def write_pgpass(dat):
     template = "{host}:{port}:{dbname}:{user_backup}:{pass_backup}\n" \
                "{host}:{port}:*:{user_stream}:{pass_stream}\n"
     contents = ''.join([template.format(**x) for x in dat])
-    pgpass = os.path.expanduser("~/.pgpass")
+    pgpass = os.environ['PGPASSFILE']
     with open(pgpass, 'w') as f:
         f.write(contents)
     os.chmod(pgpass, 0o600)
@@ -39,8 +39,9 @@ def read_barman_conf(path):
     return dat
 
 def write_barman_conf(dat):
-    dest = '/etc/barman.d/{}.conf'.format(dat['configuration_name'])
+    dest = '/var/run/barman/etc/{}.conf'.format(dat['configuration_name'])
     conf = read_template().substitute(dat)
+    dir_create(os.path.dirname(dest))
     with open(dest, 'w') as f:
         f.write(conf)
 
@@ -57,6 +58,10 @@ def basename_no_ext(path):
 
 def filter_dict(d, prefix):
     return {k: v for k, v in d.items() if k.startswith(prefix)}
+
+def dir_create(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
 
 def test_connections(dat):
     args1 = ["psql", "-h", dat['host'], "-p", str(dat['port']), "-w",
@@ -87,8 +92,8 @@ def initial_backup(conf):
 def force_archive(name, attempts=5):
     args = ["barman", "switch-xlog", "--force", "--archive", name]
     for i in range(attempts):
-        print("Trying to force server to a WAL file (attempt {}/{})".format(
-            i + 1, attempts))
+        print("Trying to force server to send a WAL file (attempt {}/{})".
+              format(i + 1, attempts))
         res = subprocess.run(args)
         if res.returncode == 0:
             print("Success!")
