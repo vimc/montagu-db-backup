@@ -1,7 +1,5 @@
-# docker stop pg_server barman pg_restore
-# docker volume rm pg_server_data barman_data barman_restore barman_etc
-# docker network rm pg_nw
-
+## Until it is set up in teamcity (which requires merge to master)
+## build the container with:
 ./teamcity-build.sh
 
 docker network create pg_nw
@@ -52,3 +50,24 @@ docker exec pg_server_recovered montagu-wait.sh
 docker exec -it pg_server_recovered \
        psql -U vimc -d montagu -c \
        "\dt"
+
+## Again, but without the server running:
+docker stop pg_server_recovered
+docker exec barman_container wipe-restore
+docker stop barman_container
+
+docker run --rm \
+       --entrypoint restore-last-no-server \
+       -v barman_data:/var/lib/barman \
+       -v barman_restore:/restore \
+       docker.montagu.dide.ic.ac.uk:5000/montagu-barman:i1333
+
+docker run --rm -d \
+       --name pg_server_recovered \
+       -v barman_restore:/pgdata \
+       docker.montagu.dide.ic.ac.uk:5000/montagu-db:i1333
+docker exec pg_server_recovered montagu-wait.sh
+docker exec -it pg_server_recovered \
+       psql -U vimc -d montagu -c \
+       "\dt"
+docker stop pg_server_recovered
