@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+import glob
+import json
+import os
+import os.path
+import string
+import subprocess
+from subprocess import PIPE
+
+def setup():
+    files = glob.glob("/etc/barman.d.in/*.json")
+    conf = [read_barman_conf(x) for x in files]
+    for x in conf:
+        write_barman_conf(x)
+    write_pgpass(conf)
+    for x in conf:
+        test_connections(x)
+    write_barman_start()
+
+def write_pgpass(dat):
+    template = "{host}:{port}:{dbname}:{user_backup}:{pass_backup}\n" \
+               "{host}:{port}:*:{user_stream}:{pass_stream}\n"
+    contents = ''.join([template.format(**x) for x in dat])
+    pgpass = os.path.expanduser("~/.pgpass")
+    with open(pgpass, 'w') as f:
+        f.write(contents)
+    os.chmod(pgpass, 0o600)
+
+def read_barman_conf(path):
+    dat = read_json(path)
+    dat['configuration_name'] = basename_no_ext(path)
+    prefix = "BARMAN_{}_".format(dat['configuration_name'].upper())
+    repl = filter_dict(os.environ, prefix)
+    for k, v in repl.items():
+        k = k.lstrip(prefix).lower()
+        if not k in dat:
+            raise KeyError("Invalid environment key '{}'".format(k))
+        dat[k.lstrip(prefix).lower()] = v
+    return dat
+
+def write_barman_conf(dat):
+    dest = '/etc/barman.d/{}.conf'.format(dat['configuration_name'])
+    conf = read_template().substitute(dat)
+    with open(dest, 'w') as f:
+        f.write(conf)
+
+def read_template():
+    with open('/etc/barman.d.in/template', 'r') as f:
+        return string.Template(f.read())
+
+def read_json(path):
+    with open(path, 'r') as f:
+        return json.load(f)
+
+def basename_no_ext(path):
+    return os.path.splitext(os.path.basename(path))[0]
+
+def filter_dict(d, prefix):
+    return {k: v for k, v in d.items() if k.startswith(prefix)}
+
+def write_barman_start():
+    barman_start = os.environ['BARMAN_START']
+    with open(barman_start, "w") as f:
+        f.write("")
+
+def test_connections(dat):
+    args1 = ["psql", "-h", dat['host'], "-p", str(dat['port']), "-w",
+             "-U", dat['user_backup'], "-d", dat['dbname'],
+             "-c", "SELECT version()"]
+    args2 = ["psql", "-h", dat['host'], "-p", str(dat['port']), "-w",
+             "-U", dat['user_stream'],
+             "-c", "IDENTIFY_SYSTEM", "replication=1"]
+    print("Testing connection for {}".format(dat['configuration_name']))
+    print("...Checking backup user")
+    r1 = subprocess.run(args1, check = True)
+    print("...Checking replication user")
+    r2 = subprocess.run(args2, check = True)
+
+if __name__ == "__main__":
+    setup()
