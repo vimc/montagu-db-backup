@@ -1,0 +1,8 @@
+[$configuration_name]
+
+conninfo = host=$host port=$port user=$user_backup dbname=$dbname
+streaming_conninfo = host=$host port=$port user=$user_stream dbname=$dbname
+
+backup_method = "postgres"
+streaming_archiver = on
+slot_name = $slot_name

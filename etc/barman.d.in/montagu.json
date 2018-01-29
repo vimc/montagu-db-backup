@@ -1,0 +1,10 @@
+{
+    "host": "pg_server",
+    "port": 5432,
+    "dbname": "montagu",
+    "user_backup": "barman",
+    "user_stream": "streaming_barman",
+    "slot_name": "barman",
+    "pass_backup": "changeme",
+    "pass_stream": "changeme"
+}
