@@ -16,7 +16,8 @@ import string
 import subprocess
 from subprocess import PIPE
 
-def setup(verify = False):
+
+def setup(verify=False):
     files = glob.glob("/etc/barman.d.in/*.json")
     conf = [read_barman_conf(x) for x in files]
     for x in conf:
@@ -24,10 +25,12 @@ def setup(verify = False):
     write_pgpass(conf)
     return conf
 
+
 def verify(conf):
     for x in conf:
         test_connections(x)
     initial_backup(conf)
+
 
 def write_pgpass(dat):
     template = "{host}:{port}:{dbname}:{user_backup}:{pass_backup}\n" \
@@ -38,6 +41,7 @@ def write_pgpass(dat):
         f.write(contents)
     os.chmod(pgpass, 0o600)
 
+
 def read_barman_conf(path):
     dat = read_json(path)
     dat['configuration_name'] = basename_no_ext(path)
@@ -45,10 +49,11 @@ def read_barman_conf(path):
     repl = filter_dict(os.environ, prefix)
     for k, v in repl.items():
         k = k.lstrip(prefix).lower()
-        if not k in dat:
+        if k not in dat:
             raise KeyError("Invalid environment key '{}'".format(k))
         dat[k] = v
     return dat
+
 
 def write_barman_conf(dat):
     dest = '/etc/barman.d/{}.conf'.format(dat['configuration_name'])
@@ -57,23 +62,29 @@ def write_barman_conf(dat):
     with open(dest, 'w') as f:
         f.write(conf)
 
+
 def read_template():
     with open('/etc/barman.d.in/template', 'r') as f:
         return string.Template(f.read())
+
 
 def read_json(path):
     with open(path, 'r') as f:
         return json.load(f)
 
+
 def basename_no_ext(path):
     return os.path.splitext(os.path.basename(path))[0]
+
 
 def filter_dict(d, prefix):
     return {k: v for k, v in d.items() if k.startswith(prefix)}
 
+
 def dir_create(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
 
 def test_connections(dat):
     args1 = ["psql", "-h", dat['host'], "-p", str(dat['port']), "-w",
@@ -84,20 +95,22 @@ def test_connections(dat):
              "-c", "IDENTIFY_SYSTEM", "replication=1"]
     print("Testing connection for {}".format(dat['configuration_name']))
     print("...Checking backup user")
-    r1 = subprocess.run(args1, check = True)
+    r1 = subprocess.run(args1, check=True)
     print("...Checking replication user")
-    r2 = subprocess.run(args2, check = True)
+    r2 = subprocess.run(args2, check=True)
+
 
 def initial_backup(conf):
     print("Running 'barman cron'")
-    subprocess.run(["barman", "cron"], check = True)
+    subprocess.run(["barman", "cron"], check=True)
     for x in conf:
         nm = x['configuration_name']
         force_archive(nm)
         print("Running initial backup of {}".format(nm))
-        subprocess.run(["barman", "backup", nm], check = True)
+        subprocess.run(["barman", "backup", nm], check=True)
         print("Checking barman status of {}".format(nm))
-        subprocess.run(["barman", "check", nm], check = True)
+        subprocess.run(["barman", "check", nm], check=True)
+
 
 # This seems a bit flakey to archive but usually runs just fine the
 # second time.  So this is set up within a set of retries
@@ -111,6 +124,7 @@ def force_archive(name, attempts=5):
             print("Success!")
             return
     raise Exception("Failed to start log archiving for {}".format(name))
+
 
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
