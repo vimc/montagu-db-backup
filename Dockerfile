@@ -21,6 +21,8 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
                 postgresql-client-9.6
 
 VOLUME /var/lib/barman
+VOLUME /var/log/barman
+VOLUME /restore
 
 COPY etc /etc
 COPY bin /usr/local/bin
