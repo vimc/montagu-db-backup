@@ -19,7 +19,7 @@ docker exec pg_server montagu-wait.sh
 ## that we have.  This, in addition to setting barman's password, also
 ## creates the replication slot on the server if it is not there
 ## already.
-docker exec pg_server set-barman-password.sh changeme
+docker exec pg_server enable-replication.sh changeme
 
 ## Restore the db - this takes *ages* unfortunately, particularly on
 ## docker cp db.dump pg_server:/db.dump
