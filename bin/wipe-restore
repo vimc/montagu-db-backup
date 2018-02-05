@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 DEST=/restore
+## NOTE: this shopt changes bash's behaviour to include dot files
+## (e.g., .barman-recover) within a glob.
 shopt -s dotglob
 rm -rf /restore/*
