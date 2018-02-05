@@ -22,10 +22,12 @@ def setup(verify = False):
     for x in conf:
         write_barman_conf(x)
     write_pgpass(conf)
-    if verify:
-        for x in conf:
-            test_connections(x)
-        initial_backup(conf)
+    return conf
+
+def verify(conf):
+    for x in conf:
+        test_connections(x)
+    initial_backup(conf)
 
 def write_pgpass(dat):
     template = "{host}:{port}:{dbname}:{user_backup}:{pass_backup}\n" \
@@ -45,7 +47,7 @@ def read_barman_conf(path):
         k = k.lstrip(prefix).lower()
         if not k in dat:
             raise KeyError("Invalid environment key '{}'".format(k))
-        dat[k.lstrip(prefix).lower()] = v
+        dat[k] = v
     return dat
 
 def write_barman_conf(dat):
@@ -112,5 +114,6 @@ def force_archive(name, attempts=5):
 
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
-    verify = not args["--no-verify"]
-    setup(verify)
+    conf = setup()
+    if not args["--no-verify"]:
+        verify(conf)
