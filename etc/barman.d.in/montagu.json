@@ -1,5 +1,5 @@
 {
-    "host": "pg_server",
+    "host": "db",
     "port": 5432,
     "dbname": "montagu",
     "user_backup": "barman",
