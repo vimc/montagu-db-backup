@@ -1,5 +1,11 @@
 ## As for demo.sh but assuming that we have montagu running via
-## deploy.  This will have created
+## deploy.
+
+## NOTE: it is not recommended to run this through noninteractively -
+## we'll get a better version of this into the deploy work.  Some of
+## the steps here will take ages!
+
+## This will have created
 ##
 ## - a network 'montagu_default'
 ## - a container 'montagu_db_1'
