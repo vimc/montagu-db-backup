@@ -93,22 +93,23 @@ def test_connections(dat):
     args2 = ["psql", "-h", dat['host'], "-p", str(dat['port']), "-w",
              "-U", dat['user_stream'],
              "-c", "IDENTIFY_SYSTEM", "replication=1"]
-    print("Testing connection for {}".format(dat['configuration_name']))
-    print("...Checking backup user")
+    print("Testing connection for {}".format(dat['configuration_name']),
+          flush=True)
+    print("...Checking backup user", flush=True)
     r1 = subprocess.run(args1, check=True)
-    print("...Checking replication user")
+    print("...Checking replication user", flush=True)
     r2 = subprocess.run(args2, check=True)
 
 
 def initial_backup(conf):
-    print("Running 'barman cron'")
+    print("Running 'barman cron'", flush=True)
     subprocess.run(["barman", "cron"], check=True)
     for x in conf:
         nm = x['configuration_name']
         force_archive(nm)
-        print("Running initial backup of {}".format(nm))
+        print("Running initial backup of {}".format(nm), flush=True)
         subprocess.run(["barman", "backup", nm], check=True)
-        print("Checking barman status of {}".format(nm))
+        print("Checking barman status of {}".format(nm), flush=True)
         subprocess.run(["barman", "check", nm], check=True)
 
 
@@ -118,10 +119,11 @@ def force_archive(name, attempts=5):
     args = ["barman", "switch-xlog", "--force", "--archive", name]
     for i in range(attempts):
         print("Trying to force server to send a WAL file (attempt {}/{})".
-              format(i + 1, attempts))
+              format(i + 1, attempts),
+              flush=True)
         res = subprocess.run(args)
         if res.returncode == 0:
-            print("Success!")
+            print("Success!", flush=True)
             return
     raise Exception("Failed to start log archiving for {}".format(name))
 

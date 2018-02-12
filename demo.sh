@@ -24,6 +24,15 @@ docker volume create barman_data
 docker volume create barman_restore
 docker network create pg_nw || true
 
+function cleanup {
+    echo "Cleaning up"
+    set +e
+    docker stop -f db barman_container db_recovered
+    docker volume rm db_data barman_data barman_restore
+    docker network rm pg_nw
+}
+trap cleanup EXIT
+
 docker run --rm -d \
        --name db \
        --network pg_nw \
@@ -43,9 +52,11 @@ docker exec db create-users.sh
 docker exec db enable-replication.sh changeme changeme
 
 ## Or, put at least one transaction worth of data in:
-docker exec -it db psql -w -U vimc -d montagu -c 'CREATE TABLE foo (bar INTEGER)'
-docker exec -it db psql -w -U vimc -d montagu -c 'INSERT INTO foo VALUES (1);'
+docker run --rm --network=pg_nw \
+       docker.montagu.dide.ic.ac.uk:5000/montagu-migrate:i1333
 
+
+## Get barman up
 docker run -d --rm \
        --name barman_container \
        --network pg_nw \
@@ -53,9 +64,6 @@ docker run -d --rm \
        -v barman_restore:/restore \
        docker.montagu.dide.ic.ac.uk:5000/montagu-barman:i1333
 
-# TODO: for reasons I do not understand, the python print statements
-# to not end up interleaved around the output of the commands that
-# they run here.
 docker exec barman_container setup-barman
 
 # If running noninteractively it seems to take barman a little time to
@@ -98,6 +106,3 @@ docker exec -it db_recovered \
        psql -U vimc -d montagu -c \
        "\dt"
 docker stop db_recovered
-
-docker network rm pg_nw
-docker volume rm db_data barman_data barman_restore
