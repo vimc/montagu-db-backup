@@ -30,11 +30,6 @@ docker exec db create-users.sh
 ## already.
 docker exec db enable-replication.sh changeme changeme
 
-## Restore the db - this takes *ages* unfortunately, particularly on
-## docker cp db.dump db:/db.dump
-## docker exec db restore-dump.sh /db.dump
-## docker exec rm /db.dump
-
 ## Or, put at least one transaction worth of data in:
 docker exec -it db psql -w -U vimc -d montagu -c 'CREATE TABLE foo (bar INTEGER)'
 docker exec -it db psql -w -U vimc -d montagu -c 'INSERT INTO foo VALUES (1);'
