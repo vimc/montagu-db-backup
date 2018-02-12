@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -ex
+
 ## Until it is set up in teamcity (which requires merge to master)
 ## build the container with:
 ./teamcity-build.sh
@@ -14,6 +17,10 @@ docker run --rm -d \
        -v db_data:/pgdata \
        docker.montagu.dide.ic.ac.uk:5000/montagu-db:i1333
 docker exec db montagu-wait.sh
+
+## This is something that needs to be done at the right place in each
+## deployment.
+docker exec db create-users.sh
 
 ## This will fit pretty happily into the general deployment approach
 ## that we have.  This, in addition to setting barman's password, also
@@ -37,7 +44,17 @@ docker run -d --rm \
        -v barman_restore:/restore \
        docker.montagu.dide.ic.ac.uk:5000/montagu-barman:i1333
 
+# TODO: for reasons I do not understand, the python print statements
+# to not end up interleaved around the output of the commands that
+# they run here.
 docker exec barman_container setup-barman
+
+# If running noninteractively it seems to take barman a little time to
+# get all the wal files in place.  This was not an issue when I ran
+# with the full montagu restore so might be an issue with very empty
+# dbs?
+sleep 60
+
 docker exec barman_container barman list-backup all
 docker exec barman_container restore-last
 
@@ -72,3 +89,6 @@ docker exec -it db_recovered \
        psql -U vimc -d montagu -c \
        "\dt"
 docker stop db_recovered
+
+docker network rm pg_nw
+docker volume rm db_data barman_data barman_restore
