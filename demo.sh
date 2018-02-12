@@ -27,7 +27,7 @@ docker network create pg_nw || true
 function cleanup {
     echo "Cleaning up"
     set +e
-    docker stop -f db barman_container db_recovered
+    docker stop db barman_container db_recovered
     docker volume rm db_data barman_data barman_restore
     docker network rm pg_nw
 }
