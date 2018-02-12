@@ -1,16 +1,28 @@
 #!/usr/bin/env bash
 set -ex
 
-HERE=$(dirname $0)
-
 ## Until it is set up in teamcity (which requires merge to master)
 ## build the container with:
-$HERE./teamcity-build.sh
+HERE=$(dirname $0)
+(cd $HERE; ./teamcity-build.sh)
 
-docker network create pg_nw
+function assert_volume_missing() {
+    NAME=$1
+    if docker volume inspect $NAME > /dev/null 2>&1; then
+        echo "Volume $NAME already exists - remove with:"
+        echo "    docker volume rm $NAME"
+        exit 1
+    fi
+}
+
+assert_volume_missing db_data
+assert_volume_missing barman_data
+assert_volume_missing barman_restore
+
 docker volume create db_data
 docker volume create barman_data
 docker volume create barman_restore
+docker network create pg_nw || true
 
 docker run --rm -d \
        --name db \
