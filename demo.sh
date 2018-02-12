@@ -81,7 +81,7 @@ docker run --rm -d \
        -v barman_restore:/pgdata \
        docker.montagu.dide.ic.ac.uk:5000/montagu-db:i1333
 docker exec db_recovered montagu-wait.sh
-docker exec -it db_recovered \
+docker exec db_recovered \
        psql -U vimc -d montagu -c \
        "\dt"
 
@@ -102,7 +102,7 @@ docker run --rm -d \
        -v barman_restore:/pgdata \
        docker.montagu.dide.ic.ac.uk:5000/montagu-db:i1333
 docker exec db_recovered montagu-wait.sh
-docker exec -it db_recovered \
+docker exec db_recovered \
        psql -U vimc -d montagu -c \
        "\dt"
 docker stop db_recovered
