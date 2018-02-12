@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -ex
 
+HERE=$(dirname $0)
+
 ## Until it is set up in teamcity (which requires merge to master)
 ## build the container with:
-./teamcity-build.sh
+$HERE./teamcity-build.sh
 
 docker network create pg_nw
 docker volume create db_data
