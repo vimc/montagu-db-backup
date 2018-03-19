@@ -21,25 +21,39 @@ BARMAN_VOLUME_DATA=barman_data
 BARMAN_VOLUME_RESTORE=barman_restore
 BARMAN_VOLUME_LOGS=barman_logs
 BARMAN_CONTAINER=barman_container
-BARMAN_IMAGE=docker.montagu.dide.ic.ac.uk:5000/montagu-barman:i1333
+BARMAN_IMAGE=docker.montagu.dide.ic.ac.uk:5000/montagu-barman:master
 
-## Prep in the postgres container - this shoulld happen during deploy:
-docker exec $MONTAGU_DB_CONTAINER enable-replication.sh changeme changeme
+## Prep in the postgres container - this should happen during deploy:
+## docker exec $MONTAGU_DB_CONTAINER enable-replication.sh changeme changeme
 
 docker volume create $BARMAN_VOLUME_DATA
 docker volume create $BARMAN_VOLUME_RESTORE
 docker volume create $BARMAN_VOLUME_LOGS
 
+# vault auth -method=github
+# BARMAN_MONTAGU_PASS_BACKUP=$(vault read -field=password secret/database/production/users/barman)
+# BARMAN_MONTAGU_PASS_STREAM=$(vault read -field=password secret/database/production/users/streaming_barman)
+BARMAN_MONTAGU_PASS_BACKUP=barman
+BARMAN_MONTAGU_PASS_STREAM=streaming_barman
+
+BARMAN_CONFIG=$(tempfile)
+
+cat > $BARMAN_CONFIG <<EOF
+BARMAN_MONTAGU_PASS_BACKUP=$BARMAN_MONTAGU_PASS_BACKUP
+BARMAN_MONTAGU_PASS_STREAM=$BARMAN_MONTAGU_PASS_STREAM
+EOF
+
 ## NOTE: this only works because:
-## * postgres db is 'db'
-## * passwords are appropriately set
 docker run -d --rm \
        --name $BARMAN_CONTAINER \
        --network $MONTAGU_NETWORK \
        -v $BARMAN_VOLUME_DATA:/var/lib/barman \
        -v $BARMAN_VOLUME_LOGS:/var/log/barman \
        -v $BARMAN_VOLUME_RESTORE:/restore \
+       --env-file $BARMAN_CONFIG \
        $BARMAN_IMAGE
+rm -f $BARMAN_CONFIG
+
 docker exec $BARMAN_CONTAINER setup-barman
 
 ## List and restore:
