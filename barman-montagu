@@ -1,0 +1,288 @@
+#!/usr/bin/env python3
+"""Set up and use barman (Postgres streaming backup) for montagu
+
+Usage:
+  barman-montagu setup [options] <host>
+  barman-montagu status
+  barman-montagu barman [--] [<args>...]
+  barman-montagu recover [--wipe-first] [<backup-id>]
+  barman-montagu wipe-recover
+  barman-montagu destroy
+
+Options:
+  --configure-cron          Configure a once-a-minute cron job
+  --password-group=<group>  Password group [default: production]
+  --image-tag=<tag>         Barman image tag [default: master]
+  --pull-image              Pull image before running?
+  --no-clean-on-error       Don't clean up container/volumes on error
+"""
+
+import os
+import re
+import socket
+import subprocess
+
+import crontab
+import docker
+import docopt
+import hvac
+
+# These defaults are all fairly montagu specific
+DEFAULT_VAULT_ADDR = "https://support.montagu.dide.ic.ac.uk:8200"
+BARMAN_CONTAINER = 'barman-montagu'
+BARMAN_VOLUMES = {'data': 'barman_data',
+                  'logs': 'barman_logs',
+                  'recover': 'barman_recover'}
+DATABASE_NAME = "montagu"
+DOCKER_REGISTRY = "docker.montagu.dide.ic.ac.uk:5000"
+DOCKER_IMAGE = "montagu-barman"
+PATH_CRON = "/etc/cron.d/barman-montagu"
+
+
+def setup(host, password_group, tag, pull, cron, clean_on_error):
+    start_barman(host, password_group, tag, pull, clean_on_error)
+    if cron:
+        configure_cron()
+
+
+def status():
+    barman = get_barman_container(error=False)
+    if barman:
+        cron_status = "enabled" if os.path.exists(PATH_CRON) else "disabled"
+        print("{} is running".format(BARMAN_CONTAINER))
+        print("cron job {}".format(cron_status))
+        exec_safely(barman, ["barman", "status", DATABASE_NAME],
+                    check=True, stream=True)
+    else:
+        print("{} is not running".format(BARMAN_CONTAINER))
+
+
+def barman(args):
+    barman = get_barman_container()
+    exec_safely(barman, ["barman"] + args, check=True, stream=True)
+
+
+def recover(id, wipe_first):
+    barman = get_barman_container()
+    if not id:
+        cmd = ["barman", "list-backup", "--minimal", DATABASE_NAME]
+        res = exec_safely(barman, cmd, check=True)
+        id = res['Output'].decode("UTF-8").strip()
+    if wipe_first:
+        wipe_recover(barman)
+    exec_safely(barman, ["barman", "recover", DATABASE_NAME, id, "/recover"],
+                stream=True, check=True)
+    print("\nThe volume '{}' now contains the restored PostgreSQL data".format(
+        BARMAN_VOLUMES["recover"]))
+
+
+def wipe_recover(barman=None):
+    barman = barman or get_barman_container()
+    print("Wiping recovery volume '{}'".format(BARMAN_VOLUMES["recover"]))
+    exec_safely(barman, ["wipe-recover"], check=True)
+
+
+def destroy():
+    if os.path.exists(PATH_CRON):
+        print("Removing cron job")
+        os.remove(PATH_CRON)
+    print("Removing barman container and volumes")
+    d = docker.client.from_env()
+    container_remove(BARMAN_CONTAINER, d)
+    for v in BARMAN_VOLUMES.values():
+        volume_remove(v, d)
+
+
+def start_barman(host, password_group, tag, pull, clean_on_error):
+    d = docker.client.from_env()
+    barman = get_barman_container(error=False)
+    if barman:
+        print("{} already running ({})".format(
+            BARMAN_CONTAINER, barman.short_id))
+        return barman
+
+    pw = get_barman_passwords(password_group)
+    image_name = '{}/{}:{}'.format(DOCKER_REGISTRY, DOCKER_IMAGE, tag)
+    volume_mappings = {
+        BARMAN_VOLUMES['data']: {'bind': '/var/lib/barman'},
+        BARMAN_VOLUMES['logs']: {'bind': '/var/log/barman'},
+        BARMAN_VOLUMES['recover']: {'bind': '/recover'}
+    }
+    db = DATABASE_NAME.upper()
+    environment = {
+        'BARMAN_{}_PASS_BACKUP'.format(db): pw['barman'],
+        'BARMAN_{}_PASS_STREAM'.format(db): pw['streaming_barman']
+    }
+    extra_hosts = {'db': resolve_host_ip(host)}
+    if pull:
+        print("Pulling image...")
+        d.images.pull(image_name)
+    volumes = [volume_create(v, d) for v in BARMAN_VOLUMES.values()]
+    barman = d.containers.run(image_name, name=BARMAN_CONTAINER, detach=True,
+                              volumes=volume_mappings, environment=environment,
+                              extra_hosts=extra_hosts)
+    try:
+        exec_safely(barman, ["setup-barman"], True, True)
+    except:
+        if clean_on_error:
+            print("Cleaning up before exit")
+            barman.remove(force=True)
+            for v, newly_created in volumes:
+                if newly_created:
+                    v.remove()
+        raise
+    return barman
+
+
+def configure_cron():
+    print("Configuring cron")
+    command = "docker exec {} barman cron".format(BARMAN_CONTAINER)
+
+    if os.path.exists(PATH_CRON):
+        os.remove(PATH_CRON)
+    cron = crontab.CronTab(user=False)
+    job = cron.new(command=command, comment="Barman backup", user="root")
+    job.minute.every(1)
+    # cron.write(PATH_CRON)
+    print("Wrote '{}' - remove this file to stop job".format(PATH_CRON))
+
+
+def vault_client():
+    vault_url = os.environ.get("VAULT_ADDR", DEFAULT_VAULT_ADDR)
+    vault_token = os.environ.get("VAULT_AUTH_GITHUB_TOKEN")
+    if not vault_token:
+        print("Please paste your vault GitHub access token: ", end="")
+        vault_token = input().strip()
+    vault = hvac.Client(url=vault_url)
+    print("Authenticating vault with GitHub")
+    vault.auth_github(vault_token)
+    return vault
+
+
+def get_barman_passwords(password_group):
+    users = ['barman', 'streaming_barman']
+
+    if password_group == "fake":
+        def get_password(user):
+            return user
+    else:
+        vault = vault_client()
+
+        def get_password(user):
+            path = "secret/database/{}/users/{}".format(password_group, user)
+            return vault.read(path)['data']['password']
+
+    return {x: get_password(x) for x in users}
+
+
+def get_barman_container(docker_client=docker.client.from_env(), error=True):
+    try:
+        return docker_client.containers.get(BARMAN_CONTAINER)
+    except docker.errors.NotFound:
+        pass
+    if error:
+        raise Exception("{} is not running; run setup first".format(
+            BARMAN_CONTAINER))
+    else:
+        return None
+
+
+def volume_create(name, docker_client=docker.client.from_env()):
+    """Create a docker volume.  Returns the a tuple of the volume and a
+    boolean indicating if the volume was freshly created"""
+    try:
+        v = docker_client.volumes.get(name)
+        return (v, False)
+    except docker.errors.NotFound:
+        print("Creating volume '{}'".format(name))
+        v = docker_client.volumes.create(name)
+        return (v, True)
+
+
+def volume_remove(name, docker_client=docker.client.from_env()):
+    try:
+        v = docker_client.volumes.get(name)
+        print("Removing volume '{}'".format(v.name))
+        v.remove()
+        return True
+    except docker.errors.NotFound:
+        return False
+
+
+def container_remove(name, docker_client=docker.client.from_env()):
+    try:
+        x = docker_client.containers.get(name)
+        print("Removing container '{}'".format(name))
+        x.remove(force=True)
+        return True
+    except docker.errors.NotFound:
+        return False
+
+
+# See comments in montagu:
+# https://github.com/vimc/montagu/pull/87/files#diff-6927d77cf5038b5393885eb816eb9d7a
+def exec_safely(container, cmd, check=False, stream=True):
+    api = container.client.api
+    exec_id = api.exec_create(container.id, cmd)['Id']
+    out = api.exec_start(exec_id, stream=stream)
+    if stream:
+        ret = []
+        for line in out:
+            print(line.decode("UTF-8"), end="")
+            ret.append(line)
+        out = b''.join(ret)
+    dat = api.exec_inspect(exec_id)
+    dat['Output'] = out
+    if check and dat['ExitCode'] != 0:
+        msg = out.decode("UTF-8").strip()
+        raise Exception("Exec failed with message '{}'".format(msg))
+    return dat
+
+
+def resolve_host_ip(host):
+    if host == "localhost" or host == "127.0.0.1":
+        return localhost_ip()
+    try:
+        parsed = socket.inet_aton(host)
+        if len(parsed) != 4:
+            raise Exception("Expected 4 octets in host if given as IP")
+        return host
+    except socket.error:
+        return socket.gethostbyname(host)
+
+
+# NOTE: not terribly portable (probably linux only).  An alternative,
+# but far more cryptic, approach is to use:
+#
+#     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+#         s.connect(('8.8.8.8', 1))
+#         return s.getsockname()[0]
+#
+# which is adapted from various stackoverflow answers.
+def localhost_ip():
+    res = subprocess.run(["hostname", "--ip-address"], check=True,
+                         stdout=subprocess.PIPE)
+    return res.stdout.decode("UTF-8").strip()
+
+
+def main():
+    args = docopt.docopt(__doc__)
+    if args['setup']:
+        setup(args['<host>'], args['--password-group'], args['--image-tag'],
+              args['--pull-image'], args['--configure-cron'],
+              not args['--no-clean-on-error'])
+    elif args['status']:
+        status()
+    elif args['barman']:
+        barman(args['<args>'])
+    elif args['recover']:
+        recover(args['<backup-id>'], args['--wipe-first'])
+    elif args['destroy']:
+        destroy()
+    elif args['wipe-recover']:
+        wipe_recover()
+    else:
+        raise Exception("(this should never happen)")
+
+if __name__ == "__main__":
+    main()

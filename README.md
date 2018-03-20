@@ -2,7 +2,82 @@
 
 As the database has grown (from a few 10s of MB up to GB) the dump-and-restore approach we are using is becoming painful.  Downloading from S3 takes quite a while (especially verification with duplicati) and the restore (`pg_restore`) takes a long time to rebuild the indices.
 
-## Barman
+## Deployment
+
+Barman is running on `annex.montagu.dide.ic.ac.uk` as container `montagu-barman`
+
+```
+git clone https://github.com/vimc/montagu-db
+cd montagu-db/backup
+pip3 install -r requirements.txt
+```
+
+Then interact with the barman container the `./barman-montagu` command:
+
+```
+$ ./montagu-barman --help
+Set up barman (Postgres streaming backup) for montagu
+
+Usage:
+  barman-montagu setup [options] <host>
+  barman-montagu status
+  barman-montagu barman [--] [<args>...]
+  barman-montagu recover [--wipe-first] [<backup-id>]
+  barman-montagu wipe-recover
+  barman-montagu destroy
+
+Options:
+  --configure-cron          Configure a once-a-minute cron job
+  --password-group=<group>  Password group [default: production]
+  --image-tag=<tag>         Barman image tag [default: master]
+  --pull-image              Pull image before running?
+  --no-clean-on-error       Don't clean up container/volumes on error
+```
+
+These commands create and pass through to the `barman` process in a long running container that is called `barman-montagu`
+
+To set up barman:
+
+```
+./barman-montagu setup --image-tag=i1559 --pull localhost
+```
+
+To see a set of status information run
+
+```
+./barman-montagu status
+```
+
+To interact with barman directly, either do `docker exec barman-montagu barman ...` or use
+
+```
+
+./barman-montagu barman -- --help
+```
+
+(the `--` is often optional but disambiguates arguments to `barman-montagu` and for barman).  For example listing files in a backup might look like:
+
+```
+./barman-montagu barman -- list-files montagu 20180320T093711
+```
+
+To dump out the latest copy of the database to recover from:
+
+```
+./barman-montagu recover --wipe-first
+```
+
+You will then need to clone the contents of the `barman_recover` volume into a suitable place to restore from.
+
+To remove all traces of barman (the cron job, the container and the volumes), use:
+
+```
+./barman-montagu destroy
+```
+
+The `barman-montagu` script does not depend on its location and can be moved to a position within `$PATH`.
+
+## Development notes
 
 This directory creates a new docker image (`vimc/montagu-barman` http://www.pgbarman.org/).
 
