@@ -65,9 +65,7 @@ def barman(args):
 def recover(id, wipe_first):
     barman = get_barman_container()
     if not id:
-        cmd = ["barman", "list-backup", "--minimal", DATABASE_NAME]
-        res = exec_safely(barman, cmd, check=True)
-        id = res['Output'].decode("UTF-8").strip()
+        id = "latest"
     if wipe_first:
         wipe_recover(barman)
     exec_safely(barman, ["barman", "recover", DATABASE_NAME, id, "/recover"],

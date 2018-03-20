@@ -3,5 +3,4 @@ DEST=/restore
 DB=montagu
 
 setup-barman --no-verify
-BACKUPID=$(barman list-backup --minimal $DB | head -n1)
-barman recover $DB $BACKUPID $DEST
+barman recover $DB "latest" $DEST
