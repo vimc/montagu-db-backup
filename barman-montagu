@@ -85,6 +85,8 @@ def wipe_recover(barman=None):
 def destroy():
     if os.path.exists(PATH_CRON):
         print("Removing cron job")
+        if os.getuid() != 0:
+            raise Exception("Please rerun with sudo to remove cron job")
         os.remove(PATH_CRON)
     print("Removing barman container and volumes")
     d = docker.client.from_env()
@@ -136,6 +138,8 @@ def start_barman(host, password_group, tag, pull, clean_on_error):
 
 def configure_cron():
     print("Configuring cron")
+    if os.getuid() != 0:
+        raise Exception("Please rerun with sudo to install cron job")
     command = "docker exec {} barman cron".format(BARMAN_CONTAINER)
 
     if os.path.exists(PATH_CRON):
@@ -143,7 +147,7 @@ def configure_cron():
     cron = crontab.CronTab(user=False)
     job = cron.new(command=command, comment="Barman backup", user="root")
     job.minute.every(1)
-    # cron.write(PATH_CRON)
+    cron.write(PATH_CRON)
     print("Wrote '{}' - remove this file to stop job".format(PATH_CRON))
 
 
