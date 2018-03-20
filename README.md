@@ -42,6 +42,14 @@ To set up barman:
 ./barman-montagu setup --image-tag=i1559 --pull localhost
 ```
 
+(replace `localhost` with the name or IP address of the host running the montagu postgres container on port 5432).
+
+To install the cron job pass `--configure-cron` (which will also require running with `sudo`).  Or to set up cron on an already running barman:
+
+```
+sudo ./barman-montagu setup --configure-cron localhost
+```
+
 To see a set of status information run
 
 ```
@@ -55,11 +63,19 @@ To interact with barman directly, either do `docker exec barman-montagu barman .
 ./barman-montagu barman -- --help
 ```
 
-(the `--` is often optional but disambiguates arguments to `barman-montagu` and for barman).  For example listing files in a backup might look like:
+(the `--` is often optional but disambiguates arguments to `barman-montagu` and for barman).  For example listing files in the most recent backup might look like:
 
 ```
-./barman-montagu barman -- list-files montagu 20180320T093711
+./barman-montagu barman list-files montagu latest
 ```
+
+or getting information about the latest backup:
+
+```
+./barman-montagu barman show-backup montagu latest
+```
+
+(see [the `barman` docs](http://docs.pgbarman.org/release/2.0) for more commands).
 
 To dump out the latest copy of the database to recover from:
 
