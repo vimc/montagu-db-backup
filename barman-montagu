@@ -75,7 +75,7 @@ def recover(id, wipe_first):
                          BARMAN_VOLUMES['recover']['path']],
                 stream=True, check=True)
     print("\nThe volume '{}' now contains the restored PostgreSQL data".format(
-        BARMAN_VOLUMES["recover"]['volume']]))
+        BARMAN_VOLUMES["recover"]['volume']))
 
 
 def wipe_recover(barman=None):
@@ -109,7 +109,7 @@ def start_barman(host, password_group, tag, pull, clean_on_error):
     pw = get_barman_passwords(password_group)
     image_name = '{}/{}:{}'.format(DOCKER_REGISTRY, DOCKER_IMAGE, tag)
     volume_mappings = {x['volume']: {'bind': x['path']}
-                       for x in BARMAN_VOLUMES}
+                       for x in BARMAN_VOLUMES.values()}
     db = DATABASE_NAME.upper()
     environment = {
         'BARMAN_{}_PASS_BACKUP'.format(db): pw['barman'],
@@ -124,7 +124,7 @@ def start_barman(host, password_group, tag, pull, clean_on_error):
                               volumes=volume_mappings, environment=environment,
                               extra_hosts=extra_hosts)
     try:
-        exec_safely(barman, ["setup-barman"], check=True, steam=True)
+        exec_safely(barman, ["setup-barman"], check=True, stream=True)
     except:
         if clean_on_error:
             print("Cleaning up before exit")
