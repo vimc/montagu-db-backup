@@ -29,9 +29,13 @@ import hvac
 # These defaults are all fairly montagu specific
 DEFAULT_VAULT_ADDR = "https://support.montagu.dide.ic.ac.uk:8200"
 BARMAN_CONTAINER = 'barman-montagu'
-BARMAN_VOLUMES = {'data': 'barman_data',
-                  'logs': 'barman_logs',
-                  'recover': 'barman_recover'}
+# The 'volume' element is the name of the volume (so can be adjusted)
+# but the 'path' element corresponds to a path within the container
+# and are assumed by either barman (for data and logs) or us (for
+# recover).
+BARMAN_VOLUMES = {'data': {'volume': 'barman_data', 'path': '/var/lib/barman'},
+                  'libs': {'volume': 'barman_logs', 'path': '/var/log/barman'},
+                  'recover': {'volume': 'barman_recover', 'path': '/recover'}}
 DATABASE_NAME = "montagu"
 DOCKER_REGISTRY = "docker.montagu.dide.ic.ac.uk:5000"
 DOCKER_IMAGE = "montagu-barman"
@@ -67,15 +71,17 @@ def recover(id, wipe_first):
         id = "latest"
     if wipe_first:
         wipe_recover(barman)
-    exec_safely(barman, ["barman", "recover", DATABASE_NAME, id, "/recover"],
+    exec_safely(barman, ["barman", "recover", DATABASE_NAME, id,
+                         BARMAN_VOLUMES['recover']['path']],
                 stream=True, check=True)
     print("\nThe volume '{}' now contains the restored PostgreSQL data".format(
-        BARMAN_VOLUMES["recover"]))
+        BARMAN_VOLUMES["recover"]['volume']]))
 
 
 def wipe_recover(barman=None):
     barman = barman or get_barman_container()
-    print("Wiping recovery volume '{}'".format(BARMAN_VOLUMES["recover"]))
+    print("Wiping recovery volume '{}'".format(
+        BARMAN_VOLUMES["recover"]['volume']))
     exec_safely(barman, ["wipe-recover"], check=True)
 
 
@@ -89,7 +95,7 @@ def destroy():
     d = docker.client.from_env()
     container_remove(BARMAN_CONTAINER, d)
     for v in BARMAN_VOLUMES.values():
-        volume_remove(v, d)
+        volume_remove(v['volume'], d)
 
 
 def start_barman(host, password_group, tag, pull, clean_on_error):
@@ -102,11 +108,8 @@ def start_barman(host, password_group, tag, pull, clean_on_error):
 
     pw = get_barman_passwords(password_group)
     image_name = '{}/{}:{}'.format(DOCKER_REGISTRY, DOCKER_IMAGE, tag)
-    volume_mappings = {
-        BARMAN_VOLUMES['data']: {'bind': '/var/lib/barman'},
-        BARMAN_VOLUMES['logs']: {'bind': '/var/log/barman'},
-        BARMAN_VOLUMES['recover']: {'bind': '/recover'}
-    }
+    volume_mappings = {x['volume']: {'bind': x['path']}
+                       for x in BARMAN_VOLUMES}
     db = DATABASE_NAME.upper()
     environment = {
         'BARMAN_{}_PASS_BACKUP'.format(db): pw['barman'],
@@ -116,7 +119,7 @@ def start_barman(host, password_group, tag, pull, clean_on_error):
     if pull:
         print("Pulling image...")
         d.images.pull(image_name)
-    volumes = [volume_create(v, d) for v in BARMAN_VOLUMES.values()]
+    volumes = [volume_create(v['volume'], d) for v in BARMAN_VOLUMES.values()]
     barman = d.containers.run(image_name, name=BARMAN_CONTAINER, detach=True,
                               volumes=volume_mappings, environment=environment,
                               extra_hosts=extra_hosts)
