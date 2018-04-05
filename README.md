@@ -39,7 +39,7 @@ These commands create and pass through to the `barman` process in a long running
 To set up barman:
 
 ```
-./barman-montagu setup --image-tag=i1559 --pull localhost
+./barman-montagu setup --image-tag=i1559 --pull-image localhost
 ```
 
 (replace `localhost` with the name or IP address of the host running the montagu postgres container on port 5432 - in a real deployment this is `production.montagu.dide.ic.ac.uk`).
