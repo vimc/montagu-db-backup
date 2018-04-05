@@ -42,7 +42,7 @@ To set up barman:
 ./barman-montagu setup --image-tag=i1559 --pull localhost
 ```
 
-(replace `localhost` with the name or IP address of the host running the montagu postgres container on port 5432).
+(replace `localhost` with the name or IP address of the host running the montagu postgres container on port 5432 - in a real deployment this is `production.montagu.dide.ic.ac.uk`).
 
 To install the cron job pass `--configure-cron` (which will also require running with `sudo`).  Or to set up cron on an already running barman:
 
