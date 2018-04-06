@@ -116,13 +116,14 @@ def start_barman(host, password_group, tag, pull, clean_on_error):
         'BARMAN_{}_PASS_STREAM'.format(db): pw['streaming_barman']
     }
     extra_hosts = {'db': resolve_host_ip(host)}
+    network = "host" if host == "localhost" else None
     if pull:
         print("Pulling image...")
         d.images.pull(image_name)
     volumes = [volume_create(v['volume'], d) for v in BARMAN_VOLUMES.values()]
     barman = d.containers.run(image_name, name=BARMAN_CONTAINER, detach=True,
                               volumes=volume_mappings, environment=environment,
-                              extra_hosts=extra_hosts)
+                              extra_hosts=extra_hosts, network=network)
     try:
         exec_safely(barman, ["setup-barman"], check=True, stream=True)
     except:
