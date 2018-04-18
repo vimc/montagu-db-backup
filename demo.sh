@@ -88,7 +88,7 @@ docker exec db_recovered \
 ## Again, but without the server running:
 docker stop db
 docker stop db_recovered
-docker exec barman_container wipe-restore
+docker exec barman_container wipe-recover
 docker stop barman_container
 
 docker run --rm \

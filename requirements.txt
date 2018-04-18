@@ -1,0 +1,4 @@
+docker
+docopt
+hvac
+python-crontab
