@@ -116,10 +116,12 @@ def initial_backup(conf):
 
 def setup_cron(conf):
     print("Setting up cron jobs", flush=True)
+    if length(conf) > 1:
+        raise Exception("This needs work to support > 1 db")
     cron = """
 * * * * * root barman cron
 0 6 * * * root update-nightly {}
-""".lstrip().format(conf["configuration_name"])
+""".lstrip().format(conf[0]["configuration_name"])
     with open("/etc/cron.d/barman", 'w') as f:
         f.write(cron)
 
