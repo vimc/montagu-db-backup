@@ -28,4 +28,4 @@ barman recover $DATABASE latest $INCOMING_PATH
 rm -rf !($INCOMING_PATH)
 mv $INCOMING_PATH/* .
 rmdir $INCOMING_PATH
-echo $(date --rfc-3339=ns) > $INCOMING_PATH/.barman-last-restore
+echo $(date --rfc-3339=ns) > $NIGHTLY_PATH/.barman-last-restore
