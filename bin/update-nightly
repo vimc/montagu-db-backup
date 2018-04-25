@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -e
 
 # The simplest way I can see to do this is via some bash options. I
 # tried some various 'find' incantations but none seem to behave
