@@ -118,13 +118,15 @@ def setup_cron(conf):
     print("Setting up cron jobs", flush=True)
     if len(conf) > 1:
         raise Exception("This needs work to support > 1 db")
+    # Runs update-nightly at 1am - this means it should be done by the
+    # time bb8 runs.
     cron = """
 * * * * * root barman cron
-0 6 * * * root update-nightly {}
+0 1 * * * root update-nightly {}
 """.lstrip().format(conf[0]["configuration_name"])
     with open("/etc/cron.d/barman", 'w') as f:
         f.write(cron)
-    print("Starting cron service")
+    print("Starting cron service", flush=True)
     subprocess.run(["service", "cron", "start"], check=True)
 
 
