@@ -17,13 +17,15 @@ shopt -s dotglob
 GLOBIGNORE=".:.."
 
 DATABASE=$1
-NIGHTLY_PATH=$2
+
+NIGHTLY_PATH=/nightly
 
 INCOMING_PATH=.incoming
 
 cd $NIGHTLY_PATH
 
-barman recover montagu latest $INCOMING_PATH
+barman recover $DATABASE latest $INCOMING_PATH
 rm -rf !($INCOMING_PATH)
 mv $INCOMING_PATH/* .
 rmdir $INCOMING_PATH
+echo $(date --rfc-3339=ns) > $INCOMING_PATH/.barman-last-restore
