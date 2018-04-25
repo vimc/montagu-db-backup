@@ -124,6 +124,8 @@ def setup_cron(conf):
 """.lstrip().format(conf[0]["configuration_name"])
     with open("/etc/cron.d/barman", 'w') as f:
         f.write(cron)
+    print("Starting cron service")
+    subprocess.run(["service", "cron", "start"], check=True)
 
 
 # This seems a bit flakey to archive but usually runs just fine the
