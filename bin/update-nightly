@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -ex
+
+# The simplest way I can see to do this is via some bash options. I
+# tried some various 'find' incantations but none seem to behave
+# terribly well.  These do:
+#
+#   - extglob: extension syntax for excluding files from a match (used in rm)
+#   - dotglob: include dot files in a * match
+#   - GLOBIGNORE: used to exclude '.' and '..' from a * match
+#
+# By doing all these operations on a single filesystem the 'mv'
+# command is instantaneous.  There is a race condition between the
+# 'rm' and the 'mv' though where there is an inconsistent filesystem.
+shopt -s extglob
+shopt -s dotglob
+GLOBIGNORE=".:.."
+
+DATABASE=$1
+NIGHTLY_PATH=$2
+
+INCOMING_PATH=.incoming
+
+cd $NIGHTLY_PATH
+
+barman recover montagu latest $INCOMING_PATH
+rm -rf !($INCOMING_PATH)
+mv $INCOMING_PATH/* .
+rmdir $INCOMING_PATH
