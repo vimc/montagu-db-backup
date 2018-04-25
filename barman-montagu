@@ -6,11 +6,11 @@ Usage:
   barman-montagu status
   barman-montagu barman [--] [<args>...]
   barman-montagu recover [--wipe-first] [<backup-id>]
+  barman-montagu recover-nightly
   barman-montagu wipe-recover
   barman-montagu destroy
 
 Options:
-  --configure-cron          Configure a once-a-minute cron job
   --password-group=<group>  Password group [default: production]
   --image-tag=<tag>         Barman image tag [default: master]
   --pull-image              Pull image before running?
@@ -21,7 +21,6 @@ import os
 import socket
 import subprocess
 
-import crontab
 import docker
 import docopt
 import hvac
@@ -35,25 +34,21 @@ BARMAN_CONTAINER = 'barman-montagu'
 # recover).
 BARMAN_VOLUMES = {'data': {'volume': 'barman_data', 'path': '/var/lib/barman'},
                   'libs': {'volume': 'barman_logs', 'path': '/var/log/barman'},
-                  'recover': {'volume': 'barman_recover', 'path': '/recover'}}
+                  'recover': {'volume': 'barman_recover', 'path': '/recover'},
+                  'nightly': {'volume': 'barman_nightly', 'path': '/nightly'}}
 DATABASE_NAME = "montagu"
 DOCKER_REGISTRY = "docker.montagu.dide.ic.ac.uk:5000"
 DOCKER_IMAGE = "montagu-barman"
-PATH_CRON = "/etc/cron.d/barman-montagu"
 
 
-def setup(host, password_group, tag, pull, cron, clean_on_error):
+def setup(host, password_group, tag, pull, clean_on_error):
     start_barman(host, password_group, tag, pull, clean_on_error)
-    if cron:
-        configure_cron()
 
 
 def status():
     barman = get_barman_container(error=False)
     if barman:
-        cron_status = "enabled" if os.path.exists(PATH_CRON) else "disabled"
         print("{} is running".format(BARMAN_CONTAINER))
-        print("cron job {}".format(cron_status))
         exec_safely(barman, ["barman", "status", DATABASE_NAME],
                     check=True, stream=True)
     else:
@@ -78,6 +73,13 @@ def recover(id, wipe_first):
         BARMAN_VOLUMES["recover"]['volume']))
 
 
+def recover_nightly():
+    barman = get_barman_container()
+    path = BARMAN_VOLUMES['nightly']['path']
+    exec_safely(["update-nightly", DATABASE_NAME, path],
+                stream=True, check=True)
+
+
 def wipe_recover(barman=None):
     barman = barman or get_barman_container()
     print("Wiping recovery volume '{}'".format(
@@ -86,11 +88,6 @@ def wipe_recover(barman=None):
 
 
 def destroy():
-    if os.path.exists(PATH_CRON):
-        print("Removing cron job")
-        if os.getuid() != 0:
-            raise Exception("Please rerun with sudo to remove cron job")
-        os.remove(PATH_CRON)
     print("Removing barman container and volumes")
     d = docker.client.from_env()
     container_remove(BARMAN_CONTAINER, d)
@@ -135,21 +132,6 @@ def start_barman(host, password_group, tag, pull, clean_on_error):
                     v.remove()
         raise
     return barman
-
-
-def configure_cron():
-    print("Configuring cron")
-    if os.getuid() != 0:
-        raise Exception("Please rerun with sudo to install cron job")
-    command = "docker exec {} barman cron".format(BARMAN_CONTAINER)
-
-    if os.path.exists(PATH_CRON):
-        os.remove(PATH_CRON)
-    cron = crontab.CronTab(user=False)
-    job = cron.new(command=command, comment="Barman backup", user="root")
-    job.minute.every(1)
-    cron.write(PATH_CRON)
-    print("Wrote '{}' - remove this file to stop job".format(PATH_CRON))
 
 
 def vault_client():
@@ -273,8 +255,7 @@ def main():
     args = docopt.docopt(__doc__)
     if args['setup']:
         setup(args['<host>'], args['--password-group'], args['--image-tag'],
-              args['--pull-image'], args['--configure-cron'],
-              not args['--no-clean-on-error'])
+              args['--pull-image'], not args['--no-clean-on-error'])
     elif args['status']:
         status()
     elif args['barman']:
@@ -285,6 +266,8 @@ def main():
         destroy()
     elif args['wipe-recover']:
         wipe_recover()
+    elif args['recover-nightly']:
+        recover_nightly()
     else:
         raise Exception("(this should never happen)")
 
