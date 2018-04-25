@@ -1,0 +1,20 @@
+{
+    "clone_reports": false,
+    "instance_name": "teamcity",
+    "initial_data_source": "minimal",
+    "notify_channel": "",
+    "db_annex_type": "fake",
+    "open_browser": false,
+    "port": "8443",
+    "backup": false,
+    "hostname": "localhost",
+    "certificate": "self_signed",
+    "persist_data": false,
+    "vault_address": "https://support.montagu.dide.ic.ac.uk:8200",
+    "include_template_reports": false,
+    "require_clean_git": false,
+    "add_test_user": false,
+    "enable_db_replication": true,
+    "password_group": "production",
+    "bb8_backup": false
+}

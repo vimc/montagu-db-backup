@@ -144,3 +144,15 @@ If we copy files around, using scp with `-o "Compression no"` can speed things u
 1. Stop montagu so that the db stops, but do not remove the data volume
 2. Rsync from the restore into the container with appropriate `--delete` flags set: this will hopefully reduce copying around too much
 3. Start up montagu!
+
+## Testing
+
+Copy `testing/montagu-deploy.json` into your `montagu/src` directory - this creates a minimal montagu deployment that supports streaming replication.
+
+Run:
+
+```
+./barman-montagu setup --pull-image localhost
+```
+
+(you may want to specify `--image-tag` too to run the branch you're working on).

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-./barman-montagu setup --image-tag=i1559 --pull localhost
+./barman-montagu setup --pull localhost
 ./barman-montagu recover
 
 docker run --rm -d \
