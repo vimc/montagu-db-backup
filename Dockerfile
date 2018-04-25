@@ -22,6 +22,7 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
 VOLUME /var/lib/barman
 VOLUME /var/log/barman
 VOLUME /recover
+VOLUME /nightly
 
 COPY etc /etc
 COPY bin /usr/local/bin
