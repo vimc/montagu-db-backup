@@ -6,7 +6,7 @@ Usage:
   barman-montagu status
   barman-montagu barman [--] [<args>...]
   barman-montagu recover [--wipe-first] [<backup-id>]
-  barman-montagu recover-nightly
+  barman-montagu update-nightly
   barman-montagu wipe-recover
   barman-montagu destroy
 
@@ -73,10 +73,9 @@ def recover(id, wipe_first):
         BARMAN_VOLUMES["recover"]['volume']))
 
 
-def recover_nightly():
+def update_nightly():
     barman = get_barman_container()
-    path = BARMAN_VOLUMES['nightly']['path']
-    exec_safely(["update-nightly", DATABASE_NAME, path],
+    exec_safely(barman, ["update-nightly", DATABASE_NAME],
                 stream=True, check=True)
 
 
@@ -266,8 +265,8 @@ def main():
         destroy()
     elif args['wipe-recover']:
         wipe_recover()
-    elif args['recover-nightly']:
-        recover_nightly()
+    elif args['update-nightly']:
+        update_nightly()
     else:
         raise Exception("(this should never happen)")
 
