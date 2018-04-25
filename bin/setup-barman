@@ -116,7 +116,7 @@ def initial_backup(conf):
 
 def setup_cron(conf):
     print("Setting up cron jobs", flush=True)
-    if length(conf) > 1:
+    if len(conf) > 1:
         raise Exception("This needs work to support > 1 db")
     cron = """
 * * * * * root barman cron
