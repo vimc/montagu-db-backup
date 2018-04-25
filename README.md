@@ -15,7 +15,7 @@ pip3 install -r requirements.txt
 Then interact with the barman container the `./barman-montagu` command:
 
 ```
-$ ./montagu-barman --help
+$ ./barman-montagu --help
 Set up barman (Postgres streaming backup) for montagu
 
 Usage:
