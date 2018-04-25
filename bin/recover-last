@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-DEST=/restore
+DEST=/recover
 DB=montagu
 
-setup-barman --no-verify
+mkdir -p $DEST
+# TODO: Assert directory is empty?
 barman recover $DB "latest" $DEST

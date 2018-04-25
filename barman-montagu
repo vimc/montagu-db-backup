@@ -74,7 +74,7 @@ def recover(id, wipe_first):
     exec_safely(barman, ["barman", "recover", DATABASE_NAME, id,
                          BARMAN_VOLUMES['recover']['path']],
                 stream=True, check=True)
-    print("\nThe volume '{}' now contains the restored PostgreSQL data".format(
+    print("\nThe volume '{}' now contains the recovered PostgreSQL data".format(
         BARMAN_VOLUMES["recover"]['volume']))
 
 

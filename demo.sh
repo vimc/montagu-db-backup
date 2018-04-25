@@ -17,18 +17,18 @@ function assert_volume_missing() {
 
 assert_volume_missing db_data
 assert_volume_missing barman_data
-assert_volume_missing barman_restore
+assert_volume_missing barman_recover
 
 docker volume create db_data
 docker volume create barman_data
-docker volume create barman_restore
+docker volume create barman_recover
 docker network create pg_nw || true
 
 function cleanup {
     echo "Cleaning up"
     set +e
     docker stop db barman_container db_recovered
-    docker volume rm db_data barman_data barman_restore
+    docker volume rm db_data barman_data barman_recover
     docker network rm pg_nw
 }
 trap cleanup EXIT
@@ -61,7 +61,7 @@ docker run -d --rm \
        --name barman_container \
        --network pg_nw \
        -v barman_data:/var/lib/barman \
-       -v barman_restore:/restore \
+       -v barman_recover:/recover \
        docker.montagu.dide.ic.ac.uk:5000/montagu-barman:i1333
 
 docker exec barman_container setup-barman
@@ -73,12 +73,12 @@ docker exec barman_container setup-barman
 sleep 60
 
 docker exec barman_container barman list-backup all
-docker exec barman_container restore-last
+docker exec barman_container recover-last
 
 ## Then try and use the instance:
 docker run --rm -d \
        --name db_recovered \
-       -v barman_restore:/pgdata \
+       -v barman_recover:/pgdata \
        docker.montagu.dide.ic.ac.uk:5000/montagu-db:i1333
 docker exec db_recovered montagu-wait.sh
 docker exec db_recovered \
@@ -92,14 +92,14 @@ docker exec barman_container wipe-recover
 docker stop barman_container
 
 docker run --rm \
-       --entrypoint restore-last-no-server \
+       --entrypoint recover-last-no-server \
        -v barman_data:/var/lib/barman \
-       -v barman_restore:/restore \
+       -v barman_recover:/recover \
        docker.montagu.dide.ic.ac.uk:5000/montagu-barman:i1333
 
 docker run --rm -d \
        --name db_recovered \
-       -v barman_restore:/pgdata \
+       -v barman_recover:/pgdata \
        docker.montagu.dide.ic.ac.uk:5000/montagu-db:i1333
 docker exec db_recovered montagu-wait.sh
 docker exec db_recovered \
