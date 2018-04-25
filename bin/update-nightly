@@ -12,6 +12,9 @@ set -e
 # By doing all these operations on a single filesystem the 'mv'
 # command is instantaneous.  There is a race condition between the
 # 'rm' and the 'mv' though where there is an inconsistent filesystem.
+#
+# The absence of the path .barman-last-restore means that the files
+# should not be used and a new backup should be requested.
 shopt -s extglob
 shopt -s dotglob
 GLOBIGNORE=".:.."
@@ -25,6 +28,7 @@ INCOMING_PATH=.incoming
 cd $NIGHTLY_PATH
 
 barman recover $DATABASE latest $INCOMING_PATH
+rm -f $NIGHTLY_PATH/.barman-last-restore
 rm -rf !($INCOMING_PATH)
 mv $INCOMING_PATH/* .
 rmdir $INCOMING_PATH
