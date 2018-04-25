@@ -10,6 +10,8 @@ RUN apt-get update && \
                 python3-setuptools \
                 wget
 
+RUN service cron start
+
 RUN pip3 install docopt
 
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
