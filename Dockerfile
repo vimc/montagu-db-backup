@@ -5,6 +5,7 @@ FROM ubuntu:16.04
 # key from the postgres deb repo
 RUN apt-get update && \
         apt-get install -y --no-install-recommends \
+                cron \
                 python3-pip \
                 python3-setuptools \
                 wget
