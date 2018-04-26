@@ -86,12 +86,14 @@ To dump out the latest copy of the database to recover from:
 You will then need to clone the contents of the `barman_recover` volume into a suitable place for the Postgres server to read from.
 
 
-Every night a snapshot of the database is written out to the `barman_nightly` volume. You can trigger this at other times by running
+Every night a snapshot of the database can be written out to the `barman_nightly` volume, by running
 
 
 ```
 ./barman-montagu update-nightly
 ```
+
+This should be arranged to run on your host machine.
 
 For a manual dump, prefer the `barman-montagu recover` which writes to the `barman_recover` volume.
 
@@ -115,7 +117,7 @@ The barman container must be able to reach the montagu-db container over the net
 1. `barman_data` (at `/var/lib/barman`) is the one that holds the backup - this should itself be backed up
 2. `barman_logs` (at `/var/log/barman`) is used to persist logs
 3. `barman_recover` (at `/recover`) holds a manual recovery location - ensure that this is empty before restoring into it
-4. `barman_nightly` (at `/nightly`) holds an automatic nightly recovery
+4. `barman_nightly` (at `/nightly`) holds a periodic recovery
 
 Barman needs to know the hostname, port, database name, two user names and two passwords.  Defaults for these are set in [etc/barman.d.in/montagu.json](etc/barman.d.in/montagu.json) but can be overridden by passing environment variables to the container in the form `BARMAN_MONTAGU_<key>` where `<key>` is one of the entries from the json, in uppercase (this can be done either with the `-e` flag or `--env-file` argument (e.g., `BARMAN_MONTAGU_PASS_BACKUP`)
 
