@@ -12,10 +12,18 @@ cd montagu-db-backup/backup
 pip3 install -r requirements.txt
 ```
 
-Then interact with the barman container the `./barman-montagu` command:
+Then install the command with
 
 ```
-$ ./barman-montagu --help
+sudo ./install
+```
+
+which sets up a `barman-montagu` command that can be used from anywhere on the computer that refers to the configuration in *this* directory (you can also use `./barman-montagu` and avoid installing).
+
+Then you can interact with the barman container the `barman-montagu` command:
+
+```
+$ barman-montagu --help
 Set up and use barman (Postgres streaming backup) for montagu
 
 Usage:
@@ -39,13 +47,13 @@ These commands create and pass through to the `barman` process in a long running
 To set up barman:
 
 ```
-./barman-montagu setup --pull-image production.montagu.dide.ic.ac.uk
+barman-montagu setup --pull-image production.montagu.dide.ic.ac.uk
 ```
 
 Or, for local testing you would want:
 
 ```
-./barman-montagu setup --pull-image localhost
+barman-montagu setup --pull-image localhost
 ```
 
 Currently the port 5432 is assumed.
@@ -53,26 +61,26 @@ Currently the port 5432 is assumed.
 To see a set of status information run
 
 ```
-./barman-montagu status
+barman-montagu status
 ```
 
 To interact with barman directly, either do `docker exec barman-montagu barman ...` or use
 
 ```
 
-./barman-montagu barman -- --help
+barman-montagu barman -- --help
 ```
 
 (the `--` is often optional but disambiguates arguments to `barman-montagu` and for barman).  For example listing files in the most recent backup might look like:
 
 ```
-./barman-montagu barman list-files montagu latest
+barman-montagu barman list-files montagu latest
 ```
 
 or getting information about the latest backup:
 
 ```
-./barman-montagu barman show-backup montagu latest
+barman-montagu barman show-backup montagu latest
 ```
 
 (see [the `barman` docs](http://docs.pgbarman.org/release/2.0) for more commands).
@@ -80,7 +88,7 @@ or getting information about the latest backup:
 To dump out the latest copy of the database to recover from:
 
 ```
-./barman-montagu recover --wipe-first
+barman-montagu recover --wipe-first
 ```
 
 You will then need to clone the contents of the `barman_recover` volume into a suitable place for the Postgres server to read from.
@@ -90,7 +98,7 @@ Every night a snapshot of the database can be written out to the `barman_nightly
 
 
 ```
-./barman-montagu update-nightly
+barman-montagu update-nightly
 ```
 
 This should be arranged to run on your host machine.
@@ -100,7 +108,7 @@ For a manual dump, prefer the `barman-montagu recover` which writes to the `barm
 To remove all traces of barman (the container and the volumes), use:
 
 ```
-./barman-montagu destroy
+barman-montagu destroy
 ```
 
 The `barman-montagu` script does not depend on its location and can be moved to a position within `$PATH`.
@@ -158,7 +166,7 @@ Copy `testing/montagu-deploy.json` into your `montagu/src` directory - this crea
 Run:
 
 ```
-./barman-montagu setup --pull-image localhost
+barman-montagu setup --pull-image localhost
 ```
 
 (you may want to specify `--image-tag` too to run the branch you're working on).
