@@ -32,10 +32,12 @@ BARMAN_CONTAINER = 'barman-montagu'
 # but the 'path' element corresponds to a path within the container
 # and are assumed by either barman (for data and logs) or us (for
 # recover).
-BARMAN_VOLUMES = {'data': {'volume': 'barman_data', 'path': '/var/lib/barman'},
-                  'libs': {'volume': 'barman_logs', 'path': '/var/log/barman'},
-                  'recover': {'volume': 'barman_recover', 'path': '/recover'},
-                  'nightly': {'volume': 'barman_nightly', 'path': '/nightly'}}
+BARMAN_VOLUMES = {
+    'data': {'volume': 'barman_data', 'path': '/var/lib/barman'},
+    'libs': {'volume': 'barman_logs', 'path': '/var/log/barman'},
+    'recover': {'volume': 'barman_recover', 'path': '/recover'},
+    'nightly': {'volume': 'montagu_db_volume', 'path': '/nightly'}
+}
 DATABASE_NAME = "montagu"
 DOCKER_REGISTRY = "docker.montagu.dide.ic.ac.uk:5000"
 DOCKER_IMAGE = "montagu-barman"
