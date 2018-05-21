@@ -24,7 +24,7 @@ def create_instance():
         }
     }
 
-    print("Requesting new instance")
+    print("Requesting new instance...")
     instances = ec2.create_instances(
         DryRun=False,
         BlockDeviceMappings=[block_device],
@@ -46,6 +46,7 @@ def create_instance():
 
 
 def get_startup_script():
-    with open('./create_instance.py', 'r') as f:
-        return f.read()
+    with open('./startup.sh', 'r') as f:
+        code = f.read()
+    return code
 
