@@ -12,7 +12,7 @@ import boto3
 from docopt import docopt
 
 from create_instance import create_instance
-from settings import key_name
+from vault import vault_client, save_securely
 
 ec2 = boto3.resource('ec2')
 
@@ -27,25 +27,48 @@ def get_instances():
     return [i for i in all if i.state['Name'] != 'terminated']
 
 
+def start():
+    instance = create_instance()
+    print("Id: " + instance.id)
+    print("Waiting for instance to be running...")
+    instance.wait_until_running()
+
+
+def status():
+    for i in get_instances():
+        print("{}: {}".format(i.id, i.state['Name']))
+        print("DNS: {}".format(i.public_dns_name))
+
+
+def stop():
+    instances = get_instances()
+    for i in instances:
+        print("Requesting termination of {}".format(i.id))
+        i.terminate()
+
+
+def dump_key():
+    vault = vault_client()
+    secret = vault.read('secret/backup/ec2/montagu-barman-keypair')
+    key = secret['data']['KeyMaterial']
+    print("Writing private key to ./montagu-barmam.pem")
+    save_securely('montagu-barmam.pem', key)
+
+    print("Use these lines to connect to active hosts:")
+    for i in get_instances():
+        print("* ssh -i ./montagu-barmam.pem ubuntu@{}".format(
+            i.public_dns_name))
+    print("\nStartup logs are in /var/log/cloud-init-output.log on the "
+          "instance")
+
+
 if __name__ == '__main__':
     args = docopt(__doc__)
     if args["start"]:
-        instance = create_instance()
-        print("Id: " + instance.id)
-        print("Waiting for instance to be running...")
-        instance.wait_until_running()
+        start()
     elif args["status"]:
-        for i in get_instances():
-            print("{}: {}".format(i.id, i.state['Name']))
-            print("DNS: {}".format(i.public_dns_name))
-
+        status()
     elif args["stop"]:
-        instances = get_instances()
-        for i in instances:
-            print("Requesting termination of {}".format(i.id))
-            i.terminate()
+        stop()
     elif args["dump_key"]:
-        key_pair = ec2.KeyPair(key_name)
-        print(dir(key_pair))
-        with open('aws-montagu-barman.pem', 'w') as f:
-            f.write(key_pair.key_material)
+        dump_key()

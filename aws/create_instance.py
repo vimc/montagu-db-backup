@@ -47,5 +47,5 @@ def create_instance():
 
 def get_startup_script():
     with open('./create_instance.py', 'r') as f:
-        text = f.read()
-    return b64encode(bytes(text, 'utf-8'))
+        return f.read()
+

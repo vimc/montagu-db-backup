@@ -5,15 +5,14 @@ ec2 = boto3.resource('ec2')
 
 
 def catch_client_error(try_block, catch, on_catch=None):
-    def decorated():
-        try:
-            try_block()
-        except ClientError as e:
-            if catch in str(e):
-                if on_catch:
-                    on_catch()
-            else:
-                raise e
+    try:
+        return try_block()
+    except ClientError as e:
+        if catch in str(e):
+            if on_catch:
+                return on_catch()
+        else:
+            raise e
 
 
 def get_group():

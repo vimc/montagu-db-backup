@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -ex
+
 mkdir /barman && cd /barman
 git clone https://github.com/vimc/montagu-db
 cd montagu-db/backup
