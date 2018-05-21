@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""Usage:
+aws-barman start
+aws-barman status
+aws-barman stop
+aws-barman dump_key
+"""
+
+# https://boto3.readthedocs.io/en/latest/reference/services/ec2.html
+
+import boto3
+from docopt import docopt
+
+from create_instance import create_instance
+from settings import key_name
+
+ec2 = boto3.resource('ec2')
+
+
+def get_instances():
+    all = ec2.instances.filter(
+        Filters=[{
+            'Name': 'tag:name',
+            'Values': ['montagu-barman']
+        }]
+    )
+    return [i for i in all if i.state['Name'] != 'terminated']
+
+
+if __name__ == '__main__':
+    args = docopt(__doc__)
+    if args["start"]:
+        instance = create_instance()
+        print("Id: " + instance.id)
+        print("Waiting for instance to be running...")
+        instance.wait_until_running()
+    elif args["status"]:
+        for i in get_instances():
+            print("{}: {}".format(i.id, i.state['Name']))
+            print("DNS: {}".format(i.public_dns_name))
+
+    elif args["stop"]:
+        instances = get_instances()
+        for i in instances:
+            print("Requesting termination of {}".format(i.id))
+            i.terminate()
+    elif args["dump_key"]:
+        key_pair = ec2.KeyPair(key_name)
+        print(dir(key_pair))
+        with open('aws-montagu-barman.pem', 'w') as f:
+            f.write(key_pair.key_material)

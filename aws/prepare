@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+if which -a aws > /dev/null; then
+	echo "AWS CLI is already installed."
+	echo "Run 'aws 'configure' if you need to reconfigure."
+else
+	apt-get install awscli
+	aws configure   # You'll need an access ID / secret key pair
+fi
+
+pip3 install -r requirements.txt
