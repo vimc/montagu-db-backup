@@ -16,6 +16,8 @@ def create_instance():
         'Ebs': {
             'Encrypted': True,
             'DeleteOnTermination': True,
+            # This is an EBS key managed by Amazon KMS, it's not the same as the
+            # key referred to by settings.key_name
             'KmsKeyId': 'cf0192d9-10be-4561-8d31-fbe32c11a048',
             'VolumeSize': volume_size,
             'VolumeType': volume_type
