@@ -105,7 +105,7 @@ if __name__ == '__main__':
     elif args["stop"]:
         stop(args)
     elif args["ssh"]:
-        dump_key()
+        ssh()
     elif args["startup_log"]:
         instance = ec2.Instance(args["<instance_id>"])
         print_startup_log(instance)

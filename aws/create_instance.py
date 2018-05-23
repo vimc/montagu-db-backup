@@ -1,5 +1,3 @@
-from base64 import b64encode
-
 import boto3
 
 from security_group import get_or_create_security_group
@@ -18,7 +16,7 @@ def create_instance():
         'Ebs': {
             'Encrypted': True,
             'DeleteOnTermination': True,
-            'KmsKeyId': '1e718288-d672-447e-95f6-d29767dccf17',
+            'KmsKeyId': 'cf0192d9-10be-4561-8d31-fbe32c11a048',
             'VolumeSize': volume_size,
             'VolumeType': volume_type
         }
