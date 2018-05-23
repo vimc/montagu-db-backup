@@ -19,6 +19,6 @@ docker build --pull \
 docker push $APP_DOCKER_BRANCH_TAG
 docker push $APP_DOCKER_COMMIT_TAG
 
-if GIT_BRANCH -eq "master"; then
+if $GIT_BRANCH -eq "i1771"; then
     docker push $PUBLIC_REGISTRY/$NAME:$GIT_BRANCH
 fi

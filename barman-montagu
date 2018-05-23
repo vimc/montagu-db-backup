@@ -13,6 +13,8 @@ Usage:
 Options:
   --password-group=<group>  Password group [default: production]
   --image-tag=<tag>         Barman image tag [default: master]
+  --image-source=<repo>     The Docker registry to pull from [default:
+  docker.montagu.dide.ic.ac.uk:5000]
   --pull-image              Pull image before running?
   --no-clean-on-error       Don't clean up container/volumes on error
 """
@@ -39,12 +41,11 @@ BARMAN_VOLUMES = {
     'nightly': {'volume': 'montagu_db_volume', 'path': '/nightly'}
 }
 DATABASE_NAME = "montagu"
-DOCKER_REGISTRY = "docker.montagu.dide.ic.ac.uk:5000"
 DOCKER_IMAGE = "montagu-barman"
 
 
-def setup(host, password_group, tag, pull, clean_on_error):
-    start_barman(host, password_group, tag, pull, clean_on_error)
+def setup(host, password_group, tag, registry, pull, clean_on_error):
+    start_barman(host, password_group, tag, registry, pull, clean_on_error)
 
 
 def status():
@@ -96,7 +97,7 @@ def destroy():
         volume_remove(v['volume'], d)
 
 
-def start_barman(host, password_group, tag, pull, clean_on_error):
+def start_barman(host, password_group, tag, registry, pull, clean_on_error):
     d = docker.client.from_env()
     barman = get_barman_container(error=False)
     if barman:
@@ -105,7 +106,7 @@ def start_barman(host, password_group, tag, pull, clean_on_error):
         return barman
 
     pw = get_barman_passwords(password_group)
-    image_name = '{}/{}:{}'.format(DOCKER_REGISTRY, DOCKER_IMAGE, tag)
+    image_name = '{}/{}:{}'.format(registry, DOCKER_IMAGE, tag)
     volume_mappings = {x['volume']: {'bind': x['path']}
                        for x in BARMAN_VOLUMES.values()}
     db = DATABASE_NAME.upper()
@@ -255,8 +256,12 @@ def localhost_ip():
 def main():
     args = docopt.docopt(__doc__)
     if args['setup']:
-        setup(args['<host>'], args['--password-group'], args['--image-tag'],
-              args['--pull-image'], not args['--no-clean-on-error'])
+        setup(args['<host>'],
+              args['--password-group'],
+              args['--image-tag'],
+              args['--image-source'],
+              args['--pull-image'],
+              not args['--no-clean-on-error'])
     elif args['status']:
         status()
     elif args['barman']:
