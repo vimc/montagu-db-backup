@@ -28,10 +28,9 @@ def create_group():
     )
 
 
-def authorize_ingress(group):
+def authorize_ingress(group, cidr_ip):
     group.authorize_ingress(
-        CidrIp="129.31.24.0/23",  # All DIDE workstations
-        # CidrIp="129.31.24.0/24",  # All DIDE servers
+        CidrIp=cidr_ip,
         IpProtocol="tcp",
         FromPort=22,
         ToPort=22
@@ -60,8 +59,14 @@ def get_or_create_security_group():
     group = catch_client_error(get_group,
                                catch="NotFound",
                                on_catch=create_group)
-    catch_client_error(lambda: authorize_ingress(group),
-                       catch="InvalidPermission.Duplicate")
+    allowed_ingress_ranges = [
+        "129.31.24.0/23",    # All DIDE workstations
+        # "129.31.24.0/24",    # All DIDE servers
+    ]
+
+    for cidr in allowed_ingress_ranges:
+        catch_client_error(lambda: authorize_ingress(group, cidr),
+                           catch="InvalidPermission.Duplicate")
     catch_client_error(lambda: authorize_egress(group),
                        catch="InvalidPermission.Duplicate")
     return group
