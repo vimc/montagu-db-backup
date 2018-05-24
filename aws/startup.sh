@@ -15,10 +15,12 @@ pip3 install -r requirements.txt
 #         (S)ocket file
 # -nNT  - Don't read, do anything remotely, or allocate a remote terminal
 # -f    - Run in background
+# -p    - Connect to SSH server on 10022, as production has a non-standard port
 # -L    - Sets up tunnel from local port to remote host & port
 ssh -M -S socket \
     -nNT \
     -f \
+    -p 10022 \
     -L 5432:localhost:5432 \
     $db_host
 
