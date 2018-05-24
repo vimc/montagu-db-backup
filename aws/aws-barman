@@ -93,6 +93,7 @@ def ssh():
 
 def print_startup_log(instance):
     dump_key()
+    print("Retrieving logs via ssh")
     run(ssh_cmd(instance) + ["less", "/var/log/cloud-init-output.log"])
 
 
