@@ -1,5 +1,6 @@
-import hvac
 import os
+
+import hvac
 
 DEFAULT_VAULT_ADDR = "https://support.montagu.dide.ic.ac.uk:8200"
 
@@ -22,3 +23,9 @@ def save_securely(path, data):
     os.chmod(path, 0o600)
     with open(path, 'w') as f:
         f.write(data)
+
+
+def get_private_key():
+    vault = vault_client()
+    secret = vault.read('secret/backup/ec2/montagu-barman-keypair')
+    return secret['data']['KeyMaterial']

@@ -1,4 +1,5 @@
 import boto3
+from awscli.customizations.emr.constants import EC2
 
 from security_group import get_or_create_security_group
 from settings import machine_image, instance_type, key_name, volume_size, \
@@ -25,7 +26,7 @@ def create_instance():
     }
 
     print("Requesting new instance...")
-    instances = ec2.create_instances(
+    instances: EC2.Instance = ec2.create_instances(
         DryRun=False,
         BlockDeviceMappings=[block_device],
         ImageId=machine_image,
@@ -46,7 +47,7 @@ def create_instance():
 
 
 def get_startup_script():
-    with open('./startup.sh', 'r') as f:
+    with open('./bin/startup.sh', 'r') as f:
         code = f.read()
     return code
 

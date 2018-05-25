@@ -8,105 +8,51 @@ aws-barman ssh
 """
 
 # https://boto3.readthedocs.io/en/latest/reference/services/ec2.html
-from subprocess import run
-from time import sleep
+from os.path import isfile
 
 import boto3
 from docopt import docopt
-from os.path import isfile
 
-from create_instance import create_instance
-from vault import vault_client, save_securely
+from barman_instance import BarmanInstance
+from vault import save_securely, get_private_key
 
 ec2 = boto3.resource('ec2')
 
 
-def get_instances():
-    all = ec2.instances.filter(
-        Filters=[{
-            'Name': 'tag:name',
-            'Values': ['montagu-barman']
-        }]
-    )
-    return [i for i in all if i.state['Name'] != 'terminated']
+def dump_key():
+    if not isfile('montagu-barman.pem'):
+        print("Writing private key to ./montagu-barman.pem")
+        save_securely('montagu-barman.pem', get_private_key())
 
 
-def start():
-    instance = create_instance()
-    print("Id: " + instance.id)
-    print("Waiting for instance to be running...")
-    instance.wait_until_running()
-    print("Waiting for DNS...")
-    while not instance.public_dns_name:
-        instance.reload()
-        sleep(2)
-    print("DNS: " + instance.public_dns_name)
-    print("To see startup log: ./aws-barman startup_log {}".format(instance.id))
+def ssh(instance: BarmanInstance):
+    if instance.exists:
+        dump_key()
+        suggested_cmd = "ssh -i ./montagu-barman.pem ubuntu@{}".format(
+            instance.public_dns_name)
+        print("To connect, use:")
+        print(suggested_cmd)
+    else:
+        print("No instance exists")
 
 
 def status():
-    for i in get_instances():
-        print("{}: {}".format(i.id, i.state['Name']))
-        print("DNS: {}".format(i.public_dns_name))
-
-
-def terminate(instance):
-    print("Requesting termination of {}".format(instance.id))
-    instance.terminate()
-
-
-def stop(args):
-    id = args["<instance_id>"]
-    if id:
-        instance = ec2.Instance(id)
-        terminate(instance)
-    else:
-        instances = get_instances()
-        for instance in instances:
-            terminate(instance)
-
-
-def dump_key():
-    if not isfile('montagu-barman.pem'):
-        vault = vault_client()
-        secret = vault.read('secret/backup/ec2/montagu-barman-keypair')
-        key = secret['data']['KeyMaterial']
-        print("Writing private key to ./montagu-barman.pem")
-        save_securely('montagu-barman.pem', key)
-
-
-def ssh_cmd(instance):
-    return [
-        "ssh",
-        "-i", "./montagu-barman.pem",
-        "ubuntu@{}".format(instance.public_dns_name)
-    ]
-
-
-def ssh():
-    dump_key()
-    print("Use these lines to connect to active hosts:")
-    for i in get_instances():
-        suggested_cmd = " ".join(ssh_cmd(i))
-        print("{}: {}".format(i.id, suggested_cmd))
-
-
-def print_startup_log(instance):
-    dump_key()
-    print("Retrieving logs via ssh")
-    run(ssh_cmd(instance) + ["less", "/var/log/cloud-init-output.log"])
+    if instance.exists:
+        print("Instance status: " + instance.status)
+        print("Instance ID: " + instance.id)
+        print("Instance DNS: " + instance.public_dns_name)
 
 
 if __name__ == '__main__':
     args = docopt(__doc__)
+    instance = BarmanInstance()
     if args["start"]:
-        start()
+        instance.start()
     elif args["status"]:
         status()
     elif args["stop"]:
-        stop(args)
+        instance.stop()
     elif args["ssh"]:
-        ssh()
+        ssh(instance)
     elif args["startup_log"]:
-        instance = ec2.Instance(args["<instance_id>"])
-        print_startup_log(instance)
+        print(instance.get_startup_log())
