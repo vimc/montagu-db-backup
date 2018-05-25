@@ -2,7 +2,7 @@
 set -ex
 db_host=aws@montagu.vaccineimpact.org
 
-mkdir /barman && cd /barman
+mkdir barman && cd barman
 git clone https://github.com/vimc/montagu-db
 cd montagu-db/backup
 git checkout i1771  # TODO: return to master

@@ -14,7 +14,7 @@ import boto3
 from docopt import docopt
 
 from barman_instance import BarmanInstance
-from vault import save_securely, get_private_key
+from vault import save_securely, get_ec2_private_key
 
 ec2 = boto3.resource('ec2')
 
@@ -22,7 +22,7 @@ ec2 = boto3.resource('ec2')
 def dump_key():
     if not isfile('montagu-barman.pem'):
         print("Writing private key to ./montagu-barman.pem")
-        save_securely('montagu-barman.pem', get_private_key())
+        save_securely('montagu-barman.pem', get_ec2_private_key())
 
 
 def ssh(instance: BarmanInstance):

@@ -1,11 +1,11 @@
-import socket
-from io import BytesIO, StringIO
+from io import StringIO
 from time import sleep
 
 from paramiko import SSHClient, AutoAddPolicy, RSAKey
 from scp import SCPClient
 
-from vault import get_private_key
+from vault import get_ec2_private_key, get_target_private_key, \
+    get_target_host_key
 
 
 class BarmanSSHClient(object):
@@ -43,8 +43,22 @@ class BarmanSSHClient(object):
 
     def run_barman(self):
         with SCPClient(self.client.get_transport()) as scp:
+            self._add_known_host(get_target_host_key())
+            self._upload_private_key(scp)
             scp.put("bin/run-barman.sh")
+
         return self._run_remote_cmd("./run-barman.sh")
+
+    def _add_known_host(self, public_key):
+        self._run_remote_cmd('echo "{}" >> .ssh/known_hosts '
+                             '&& rm public_key'.format(public_key))
+
+    def _upload_private_key(self, scp):
+        key_path = ".ssh/id_rsa"
+        self._run_remote_cmd("touch {p} && chmod 600 {p}".format(
+            p=key_path))
+        with StringIO(get_target_private_key()) as key:
+            scp.putfo(key, key_path)
 
     def get_startup_log(self):
         print("Retrieving logs via ssh")
@@ -72,4 +86,4 @@ class BarmanSSHClient(object):
         return out + err
 
     def _get_key(self):
-        return RSAKey.from_private_key(StringIO(get_private_key()))
+        return RSAKey.from_private_key(StringIO(get_ec2_private_key()))
