@@ -1,11 +1,11 @@
 import socket
-from io import StringIO
+from io import BytesIO, StringIO
 from time import sleep
 
 from paramiko import SSHClient, AutoAddPolicy, RSAKey
 from scp import SCPClient
 
-from vault import vault_client, get_private_key
+from vault import get_private_key
 
 
 class BarmanSSHClient(object):
@@ -24,17 +24,21 @@ class BarmanSSHClient(object):
         ssh.set_missing_host_key_policy(AutoAddPolicy())
         private_key = self._get_key()
         connected = False
+        retries = 10
         while not connected:
             try:
                 ssh.connect(self.host, username=self.username, pkey=private_key)
                 connected = True
-            except socket.gaierror:
+            except Exception:
+                retries -= 1
+                if retries == 0:
+                    raise
                 sleep(2)
         self.client = ssh
 
     def wait_for_go_signal(self):
         print("Waiting for go signal...")
-        while self._run_remote_cmd("cat go_signal || true") != "ready":
+        while self._run_remote_cmd("cat go_signal") != "ready":
             sleep(2)
 
     def run_barman(self):
@@ -50,11 +54,22 @@ class BarmanSSHClient(object):
         if self.client:
             self.client.close()
 
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
+
     def _run_remote_cmd(self, cmd):
-        stdin, stdout, stderr = self.client.exec_command("cat ~/go_signal")
-        return stdout.read().decode('utf-8').strip() == "ready"
+        stdin, stdout, stderr = self.client.exec_command(cmd)
+        exit_code = stdout.channel.recv_exit_status()
+        out = stdout.read().decode('utf-8').strip()
+        err = stderr.read().decode('utf-8').strip()
+        if exit_code < 0:
+            raise Exception("An error occurred running remote command"
+                            "{}: {}".format(cmd, err))
+        return out + err
 
     def _get_key(self):
-        with StringIO() as io:
-            io.write(get_private_key())
-            return RSAKey.from_private_key_file(io)
+        return RSAKey.from_private_key(StringIO(get_private_key()))

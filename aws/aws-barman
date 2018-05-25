@@ -2,8 +2,8 @@
 """Usage:
 aws-barman start
 aws-barman status
-aws-barman stop [<instance_id>]
-aws-barman startup_log <instance_id>
+aws-barman stop
+aws-barman startup_log
 aws-barman ssh
 """
 

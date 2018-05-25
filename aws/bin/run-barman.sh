@@ -2,9 +2,6 @@
 set -ex
 db_host=aws@montagu.vaccineimpact.org
 
-apt-get update
-apt-get install -y python3-pip
-
 mkdir /barman && cd /barman
 git clone https://github.com/vimc/montagu-db
 cd montagu-db/backup
