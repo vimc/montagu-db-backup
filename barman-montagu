@@ -229,7 +229,7 @@ def exec_safely(container, cmd, check=False, stream=True):
 
 def resolve_host_ip(host):
     if host == "localhost" or host == "127.0.0.1":
-        return localhost_ip()
+        return "127.0.0.1"
     try:
         parsed = socket.inet_aton(host)
         if len(parsed) != 4:
