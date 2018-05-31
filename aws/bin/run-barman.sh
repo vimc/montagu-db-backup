@@ -3,7 +3,7 @@ set -ex
 db_host="montagu.vaccineimpact.org"
 user_and_host="aws@$db_host"
 
-source ./db_passwords
+source ./db_passwords && rm ./db_passwords
 
 mkdir barman && cd barman
 git clone https://github.com/vimc/montagu-db
