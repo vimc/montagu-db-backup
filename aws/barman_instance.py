@@ -25,6 +25,7 @@ class BarmanInstance(object):
         print("Id: " + self.id)
         try:
             self.wait_for_startup()
+            self.run_barman()
         except Exception:
             self.stop()
             raise
@@ -40,7 +41,10 @@ class BarmanInstance(object):
 
         with BarmanSSHClient(self.public_dns_name) as ssh:
             ssh.wait_for_go_signal()
-            print(ssh.run_barman())
+
+    def run_barman(self):
+        with BarmanSSHClient(self.public_dns_name) as ssh:
+            ssh.run_barman()
 
     def stop(self):
         if self.exists:

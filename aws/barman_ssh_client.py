@@ -1,3 +1,4 @@
+import select
 from io import StringIO
 from time import sleep
 
@@ -37,17 +38,23 @@ class BarmanSSHClient(object):
         self.client = ssh
 
     def wait_for_go_signal(self):
+        # The startup script we pass to AWS in create_instance, which resides at
+        # bin/startup.sh locally, writes to a file at a known location. So if
+        # we monitor this file we know when the instance has finished its
+        # startup.
         print("Waiting for go signal...")
         while self._run_remote_cmd("cat go_signal") != "ready":
             sleep(2)
 
     def run_barman(self):
+        print("Copying files needed to run barman...")
         with SCPClient(self.client.get_transport()) as scp:
             self._add_known_host(get_target_host_key())
             self._upload_private_key(scp)
             scp.put("bin/run-barman.sh")
 
-        return self._run_remote_cmd("./run-barman.sh")
+        print("Running barman...")
+        self._run_long_remote_cmd("./run-barman.sh")
 
     def _add_known_host(self, public_key):
         self._run_remote_cmd('echo "{}" >> .ssh/known_hosts '
@@ -84,6 +91,34 @@ class BarmanSSHClient(object):
             raise Exception("An error occurred running remote command"
                             "{}: {}".format(cmd, err))
         return out + err
+
+    # Heavily based off https://stackoverflow.com/questions/23504126/do-you-have-to-check-exit-status-ready-if-you-are-going-to-check-recv-ready/32758464#32758464
+    def _run_long_remote_cmd(self, cmd):
+        stdin, stdout, stderr = self.client.exec_command(cmd)
+        channel = stdout.channel # shared channel for stdout/stderr/stdin
+        stdin.close()
+        channel.shutdown_write()
+
+        def print_line(data):
+            print(data.decode('utf-8'), end='')
+
+        while not channel.closed or channel.recv_ready() or channel.recv_stderr_ready():
+            got_chunk = False
+            sleep(0.25)
+            if channel.recv_ready():
+                print_line(channel.recv(len(channel.in_buffer)))
+                got_chunk = True
+            if channel.recv_stderr_ready():
+                print_line(channel.recv_stderr(len(channel.in_stderr_buffer)))
+                got_chunk = True
+
+            if not got_chunk \
+                    and stdout.channel.exit_status_ready() \
+                    and not stderr.channel.recv_stderr_ready() \
+                    and not stdout.channel.recv_ready():
+                stdout.channel.shutdown_read()
+                stdout.channel.close()
+                break
 
     def _get_key(self):
         return RSAKey.from_private_key(StringIO(get_ec2_private_key()))
