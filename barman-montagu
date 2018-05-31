@@ -155,13 +155,12 @@ def get_barman_passwords(password_group):
         def get_password(user):
             return user
     else:
-        vault = vault_client()
-
         def get_password(user):
             password = os.environ.get("MONTAGU_DB_PASSWORD_" + user)
             if password:
                 return password
             else:
+                vault = vault_client()
                 path = "secret/database/{}/users/{}".format(password_group, user)
                 return vault.read(path)['data']['password']
 

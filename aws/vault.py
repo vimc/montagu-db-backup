@@ -21,7 +21,7 @@ class VaultClient(object):
             print("Please paste your vault GitHub access token: ", end="")
             vault_token = input().strip()
         self.client = hvac.Client(url=vault_url)
-        print("Authenticating vault with GitHub")
+        print("Authenticating to vault with GitHub")
         self.client.auth_github(vault_token)
 
     def _read_secret(self, path, field='value'):
@@ -34,12 +34,14 @@ class VaultClient(object):
         The instance is set up to trust this key by the KeyName parameter in
         create_instance. Amazon holds the public key and is able to inject it
         into authorized_keys on each new instance."""
-        return self._read_secret('secret/backup/ec2/montagu-barman-keypair')
+        return self._read_secret('secret/backup/ec2/montagu-barman-keypair',
+                                 field='KeyMaterial')
 
     @property
     def target_private_key(self):
         """Returns the key that the ec2 instance uses to SSH to production."""
-        return self._read_secret('secret/backup/ec2/target-keypair')
+        return self._read_secret('secret/backup/ec2/target-keypair',
+                                 field='KeyMaterial')
 
     @property
     def target_host_key(self):
@@ -48,7 +50,7 @@ class VaultClient(object):
 
     def get_password(self, user):
         return self._read_secret('secret/database/production/users/{}'.format(
-            user))
+            user), field='password')
 
     def get_barman_passwords(self):
         return {

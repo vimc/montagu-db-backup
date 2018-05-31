@@ -133,4 +133,4 @@ export MONTAGU_DB_PASSWORD_streaming_barman={streaming_barman}
             raise Exception("An error occurred running the remote command")
 
     def _get_key(self):
-        return RSAKey.from_private_key(StringIO(self.vault.ec2_private_key()))
+        return RSAKey.from_private_key(StringIO(self.vault.ec2_private_key))
