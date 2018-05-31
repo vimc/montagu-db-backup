@@ -5,6 +5,7 @@ from awscli.customizations.emr.constants import EC2
 
 from barman_ssh_client import BarmanSSHClient
 from create_instance import create_instance
+from vault import limited_token
 
 
 class BarmanInstance(object):
@@ -27,6 +28,7 @@ class BarmanInstance(object):
             self.wait_for_startup()
             self.run_barman()
         except Exception:
+            print("-" * 76)
             self.stop()
             raise
 

@@ -138,13 +138,19 @@ def start_barman(host, password_group, tag, registry, pull, clean_on_error):
 
 def vault_client():
     vault_url = os.environ.get("VAULT_ADDR", DEFAULT_VAULT_ADDR)
-    vault_token = os.environ.get("VAULT_AUTH_GITHUB_TOKEN")
-    if not vault_token:
-        print("Please paste your vault GitHub access token: ", end="")
-        vault_token = input().strip()
     vault = hvac.Client(url=vault_url)
-    print("Authenticating vault with GitHub")
-    vault.auth_github(vault_token)
+    vault_token = os.environ.get("VAULT_AUTH_TOKEN")
+    if vault_token:
+        print("Authenticating to vault")
+        vault.token = vault_token
+        assert vault.is_authenticated()
+    else:
+        github_token = os.environ.get("VAULT_AUTH_GITHUB_TOKEN")
+        if not github_token:
+            print("Please paste your vault GitHub access token: ", end="")
+            github_token = input().strip()
+        print("Authenticating to vault with GitHub")
+        vault.auth_github(github_token)
     return vault
 
 

@@ -3,6 +3,8 @@ set -ex
 db_host="montagu.vaccineimpact.org"
 user_and_host="aws@$db_host"
 
+export VAULT_AUTH_TOKEN=$(<./vault_auth_token)
+
 mkdir barman && cd barman
 git clone https://github.com/vimc/montagu-db
 cd montagu-db/backup
@@ -28,7 +30,6 @@ ssh -S socket -O check $user_and_host
 trap "ssh -S socket -O exit $user_and_host" SIGINT SIGTERM
 
 ./barman-montagu setup \
-    --password-group=fake \
     --pull-image \
     --image-source=vimc \
     --no-clean-on-error \

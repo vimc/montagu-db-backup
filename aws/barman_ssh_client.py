@@ -6,7 +6,7 @@ from paramiko import SSHClient, AutoAddPolicy, RSAKey
 from scp import SCPClient
 
 from vault import get_ec2_private_key, get_target_private_key, \
-    get_target_host_key
+    get_target_host_key, limited_token
 
 
 class BarmanSSHClient(object):
@@ -51,14 +51,15 @@ class BarmanSSHClient(object):
         with SCPClient(self.client.get_transport()) as scp:
             self._add_known_host(get_target_host_key())
             self._upload_private_key(scp)
+            self._upload_vault_token(scp)
             scp.put("bin/run-barman.sh")
 
         print("Running barman...")
         self._run_long_remote_cmd("./run-barman.sh")
 
     def _add_known_host(self, public_key):
-        self._run_remote_cmd('echo "{}" >> .ssh/known_hosts '
-                             '&& rm public_key'.format(public_key))
+        self._run_remote_cmd('echo "{}" >> .ssh/known_hosts '.format(
+            public_key))
 
     def _upload_private_key(self, scp):
         key_path = ".ssh/id_rsa"
@@ -66,6 +67,11 @@ class BarmanSSHClient(object):
             p=key_path))
         with StringIO(get_target_private_key()) as key:
             scp.putfo(key, key_path)
+
+    def _upload_vault_token(self, scp):
+        print("Adding vault token...")
+        with StringIO(limited_token()) as token_fo:
+            scp.putfo(token_fo, "vault_auth_token")
 
     def get_startup_log(self):
         print("Retrieving logs via ssh")
@@ -95,7 +101,7 @@ class BarmanSSHClient(object):
     # Heavily based off https://stackoverflow.com/questions/23504126/do-you-have-to-check-exit-status-ready-if-you-are-going-to-check-recv-ready/32758464#32758464
     def _run_long_remote_cmd(self, cmd):
         stdin, stdout, stderr = self.client.exec_command(cmd)
-        channel = stdout.channel # shared channel for stdout/stderr/stdin
+        channel = stdout.channel  # shared channel for stdout/stderr/stdin
         stdin.close()
         channel.shutdown_write()
 

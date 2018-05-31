@@ -51,3 +51,9 @@ def get_target_host_key():
     vault = vault_client()
     secret = vault.read('secret/backup/ec2/target-host-key')
     return secret['data']['value']
+
+
+def limited_token():
+    vault = vault_client()
+    token_object = vault.create_token(policies=['barman'], lease='1m')
+    return token_object['auth']['client_token']
