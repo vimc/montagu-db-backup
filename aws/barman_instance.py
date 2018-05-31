@@ -5,14 +5,15 @@ from awscli.customizations.emr.constants import EC2
 
 from barman_ssh_client import BarmanSSHClient
 from create_instance import create_instance
-from vault import limited_token
+from vault import VaultClient
 
 
 class BarmanInstance(object):
-    def __init__(self, name="montagu-barman", ec2=None):
+    def __init__(self, name="montagu-barman", ec2=None, vault=VaultClient()):
         self.name = name
         self.ec2 = ec2 or boto3.resource('ec2')
         self._instance: EC2.Instance = None
+        self.vault = vault
 
     @property
     def exists(self):
@@ -41,11 +42,11 @@ class BarmanInstance(object):
             sleep(2)
         print("DNS: " + self.public_dns_name)
 
-        with BarmanSSHClient(self.public_dns_name) as ssh:
+        with BarmanSSHClient(self.public_dns_name, self.vault) as ssh:
             ssh.wait_for_go_signal()
 
     def run_barman(self):
-        with BarmanSSHClient(self.public_dns_name) as ssh:
+        with BarmanSSHClient(self.public_dns_name, self.vault) as ssh:
             ssh.run_barman()
 
     def stop(self):
@@ -55,7 +56,7 @@ class BarmanInstance(object):
 
     def get_startup_log(self):
         if self.exists:
-            with BarmanSSHClient(self.public_dns_name) as ssh:
+            with BarmanSSHClient(self.public_dns_name, self.vault) as ssh:
                 return ssh.get_startup_log()
         else:
             return "<No instance running>"

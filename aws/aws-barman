@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Usage:
-aws-barman start
+aws-barman start [--no-stop-on-error]
 aws-barman status
 aws-barman stop
 aws-barman startup_log
 aws-barman ssh
+
+Options:
+  --no-stop-on-error    Don't stop and remove in the instance on error
 """
 
 # https://boto3.readthedocs.io/en/latest/reference/services/ec2.html
@@ -14,20 +17,20 @@ import boto3
 from docopt import docopt
 
 from barman_instance import BarmanInstance
-from vault import save_securely, get_ec2_private_key
+from vault import save_securely, VaultClient
 
 ec2 = boto3.resource('ec2')
 
 
-def dump_key():
+def dump_key(vault: VaultClient):
     if not isfile('montagu-barman.pem'):
         print("Writing private key to ./montagu-barman.pem")
-        save_securely('montagu-barman.pem', get_ec2_private_key())
+        save_securely('montagu-barman.pem', vault.ec2_private_key)
 
 
-def ssh(instance: BarmanInstance):
+def ssh(instance: BarmanInstance, vault: VaultClient):
     if instance.exists:
-        dump_key()
+        dump_key(vault)
         suggested_cmd = "ssh -i ./montagu-barman.pem ubuntu@{}".format(
             instance.public_dns_name)
         print("To connect, use:")
@@ -53,6 +56,6 @@ if __name__ == '__main__':
     elif args["stop"]:
         instance.stop()
     elif args["ssh"]:
-        ssh(instance)
+        ssh(instance, VaultClient())
     elif args["startup_log"]:
         print(instance.get_startup_log())

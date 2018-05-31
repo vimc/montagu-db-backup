@@ -1,19 +1,18 @@
-import select
 from io import StringIO
 from time import sleep
 
 from paramiko import SSHClient, AutoAddPolicy, RSAKey
 from scp import SCPClient
 
-from vault import get_ec2_private_key, get_target_private_key, \
-    get_target_host_key, limited_token
+from vault import VaultClient
 
 
 class BarmanSSHClient(object):
-    def __init__(self, host: str):
+    def __init__(self, host: str, vault: VaultClient):
         self.host = host
         self.username = "ubuntu"
         self.client: SSHClient = None
+        self.vault = vault
 
     def connect(self):
         if self.client:
@@ -49,9 +48,9 @@ class BarmanSSHClient(object):
     def run_barman(self):
         print("Copying files needed to run barman...")
         with SCPClient(self.client.get_transport()) as scp:
-            self._add_known_host(get_target_host_key())
+            self._add_known_host(self.vault.target_host_key)
             self._upload_private_key(scp)
-            self._upload_vault_token(scp)
+            self._upload_db_passwords(scp)
             scp.put("bin/run-barman.sh")
 
         print("Running barman...")
@@ -65,13 +64,17 @@ class BarmanSSHClient(object):
         key_path = ".ssh/id_rsa"
         self._run_remote_cmd("touch {p} && chmod 600 {p}".format(
             p=key_path))
-        with StringIO(get_target_private_key()) as key:
+        with StringIO(self.vault.target_private_key) as key:
             scp.putfo(key, key_path)
 
-    def _upload_vault_token(self, scp):
-        print("Adding vault token...")
-        with StringIO(limited_token()) as token_fo:
-            scp.putfo(token_fo, "vault_auth_token")
+    def _upload_db_passwords(self, scp):
+        print("Adding db passwords...")
+        passwords = """
+export MONTAGU_DB_PASSWORD_barman={barman}
+export MONTAGU_DB_PASSWORD_streaming_barman={streaming_barman}
+""".format(**self.vault.get_barman_passwords())
+        with StringIO(passwords) as token_fo:
+            scp.putfo(token_fo, "db_passwords")
 
     def get_startup_log(self):
         print("Retrieving logs via ssh")
@@ -130,4 +133,4 @@ class BarmanSSHClient(object):
             raise Exception("An error occurred running the remote command")
 
     def _get_key(self):
-        return RSAKey.from_private_key(StringIO(get_ec2_private_key()))
+        return RSAKey.from_private_key(StringIO(self.vault.ec2_private_key()))

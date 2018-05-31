@@ -138,19 +138,13 @@ def start_barman(host, password_group, tag, registry, pull, clean_on_error):
 
 def vault_client():
     vault_url = os.environ.get("VAULT_ADDR", DEFAULT_VAULT_ADDR)
+    vault_token = os.environ.get("VAULT_AUTH_GITHUB_TOKEN")
+    if not vault_token:
+        print("Please paste your vault GitHub access token: ", end="")
+        vault_token = input().strip()
     vault = hvac.Client(url=vault_url)
-    vault_token = os.environ.get("VAULT_AUTH_TOKEN")
-    if vault_token:
-        print("Authenticating to vault")
-        vault.token = vault_token
-        assert vault.is_authenticated()
-    else:
-        github_token = os.environ.get("VAULT_AUTH_GITHUB_TOKEN")
-        if not github_token:
-            print("Please paste your vault GitHub access token: ", end="")
-            github_token = input().strip()
-        print("Authenticating to vault with GitHub")
-        vault.auth_github(github_token)
+    print("Authenticating vault with GitHub")
+    vault.auth_github(vault_token)
     return vault
 
 
@@ -164,8 +158,12 @@ def get_barman_passwords(password_group):
         vault = vault_client()
 
         def get_password(user):
-            path = "secret/database/{}/users/{}".format(password_group, user)
-            return vault.read(path)['data']['password']
+            password = os.environ.get("MONTAGU_DB_PASSWORD_" + user)
+            if password:
+                return password
+            else:
+                path = "secret/database/{}/users/{}".format(password_group, user)
+                return vault.read(path)['data']['password']
 
     return {x: get_password(x) for x in users}
 

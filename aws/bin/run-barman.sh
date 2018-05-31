@@ -3,7 +3,7 @@ set -ex
 db_host="montagu.vaccineimpact.org"
 user_and_host="aws@$db_host"
 
-export VAULT_AUTH_TOKEN=$(<./vault_auth_token)
+source ./db_passwords
 
 mkdir barman && cd barman
 git clone https://github.com/vimc/montagu-db
