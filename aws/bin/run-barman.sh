@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -ex
-db_host=aws@montagu.vaccineimpact.org
+db_host="montagu.vaccineimpact.org"
+user_and_host="aws@$db_host"
 
 mkdir barman && cd barman
 git clone https://github.com/vimc/montagu-db
@@ -18,13 +19,13 @@ ssh -M -S socket \
     -nNT \
     -f \
     -p 10022 \
-    -L 5432:localhost:5432 \
-    $db_host
+    -L 5432:$db_host:5432 \
+    $user_and_host
 
 # Check the connection is up
-ssh -S socket -O check $db_host
+ssh -S socket -O check $user_and_host
 
-trap "ssh -S socket -O exit $db_host" SIGINT SIGTERM
+trap "ssh -S socket -O exit $user_and_host" SIGINT SIGTERM
 
 ./barman-montagu setup \
     --password-group=fake \

@@ -120,5 +120,8 @@ class BarmanSSHClient(object):
                 stdout.channel.close()
                 break
 
+        if channel.recv_exit_status() != 0:
+            raise Exception("An error occurred running the remote command")
+
     def _get_key(self):
         return RSAKey.from_private_key(StringIO(get_ec2_private_key()))
