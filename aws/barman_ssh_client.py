@@ -68,7 +68,6 @@ class BarmanSSHClient(object):
             scp.putfo(key, key_path)
 
     def _upload_db_passwords(self, scp):
-        print("Adding db passwords...")
         passwords = """
 export MONTAGU_DB_PASSWORD_barman={barman}
 export MONTAGU_DB_PASSWORD_streaming_barman={streaming_barman}
