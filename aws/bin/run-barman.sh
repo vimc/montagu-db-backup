@@ -31,4 +31,4 @@ trap "ssh -S socket -O exit $user_and_host" SIGINT SIGTERM
 
 # -u makes Python not buffer stdout, so we can monitor remotely
 # localhost is forwarded by SSH to the true host
-python3 -u ./barman-montagu setup --pull-image --image-source=vimc --no-clean-on-error localhost
+python3 -u ./barman-montagu setup --pull-image --image-source=vimc --no-clean-on-error --slot=barman_aws localhost

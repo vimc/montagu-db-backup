@@ -27,7 +27,7 @@ $ barman-montagu --help
 Set up and use barman (Postgres streaming backup) for montagu
 
 Usage:
-  barman-montagu setup [options] <host>
+  barman-montagu setup [options] --slot=<slot> <host>
   barman-montagu status
   barman-montagu barman [--] [<args>...]
   barman-montagu recover [--wipe-first] [<backup-id>]
@@ -38,8 +38,12 @@ Usage:
 Options:
   --password-group=<group>  Password group [default: production]
   --image-tag=<tag>         Barman image tag [default: master]
+  --image-source=<repo>     The Docker registry to pull from [default:
+  docker.montagu.dide.ic.ac.uk:5000]
   --pull-image              Pull image before running?
   --no-clean-on-error       Don't clean up container/volumes on error
+  --slot=<slot>             Replication slot to use on the db
+
 ```
 
 These commands create and pass through to the `barman` process in a long running container that is called `barman-montagu`
@@ -47,13 +51,13 @@ These commands create and pass through to the `barman` process in a long running
 To set up barman:
 
 ```
-barman-montagu setup --pull-image production.montagu.dide.ic.ac.uk
+barman-montagu setup --pull-image --slot barman production.montagu.dide.ic.ac.uk
 ```
 
 Or, for local testing you would want:
 
 ```
-barman-montagu setup --pull-image localhost
+barman-montagu setup --pull-image --slot barman localhost
 ```
 
 Currently the port 5432 is assumed.

@@ -4,7 +4,7 @@
     "dbname": "montagu",
     "user_backup": "barman",
     "user_stream": "streaming_barman",
-    "slot_name": "barman",
+    "slot_name": "default is: barman",
     "pass_backup": "changeme",
     "pass_stream": "changeme"
 }

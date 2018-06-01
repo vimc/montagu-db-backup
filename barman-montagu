@@ -2,7 +2,7 @@
 """Set up and use barman (Postgres streaming backup) for montagu
 
 Usage:
-  barman-montagu setup [options] <host>
+  barman-montagu setup [options] --slot=<slot> <host>
   barman-montagu status
   barman-montagu barman [--] [<args>...]
   barman-montagu recover [--wipe-first] [<backup-id>]
@@ -17,6 +17,7 @@ Options:
   docker.montagu.dide.ic.ac.uk:5000]
   --pull-image              Pull image before running?
   --no-clean-on-error       Don't clean up container/volumes on error
+  --slot=<slot>             Replication slot to use on the db
 """
 
 import os
@@ -44,8 +45,9 @@ DATABASE_NAME = "montagu"
 DOCKER_IMAGE = "montagu-barman"
 
 
-def setup(host, password_group, tag, registry, pull, clean_on_error):
-    start_barman(host, password_group, tag, registry, pull, clean_on_error)
+def setup(host, slot, password_group, tag, registry, pull, clean_on_error):
+    start_barman(host, slot, password_group, tag, registry, pull,
+                 clean_on_error)
 
 
 def status():
@@ -97,7 +99,8 @@ def destroy():
         volume_remove(v['volume'], d)
 
 
-def start_barman(host, password_group, tag, registry, pull, clean_on_error):
+def start_barman(host, slot, password_group, tag, registry, pull,
+                 clean_on_error):
     d = docker.client.from_env()
     barman = get_barman_container(error=False)
     if barman:
@@ -112,7 +115,8 @@ def start_barman(host, password_group, tag, registry, pull, clean_on_error):
     db = DATABASE_NAME.upper()
     environment = {
         'BARMAN_{}_PASS_BACKUP'.format(db): pw['barman'],
-        'BARMAN_{}_PASS_STREAM'.format(db): pw['streaming_barman']
+        'BARMAN_{}_PASS_STREAM'.format(db): pw['streaming_barman'],
+        'BARMAN_{}_SLOT_NAME'.format(db): slot
     }
     extra_hosts = {'db': resolve_host_ip(host)}
     network = "host" if host == "localhost" else None
@@ -260,6 +264,7 @@ def main():
     args = docopt.docopt(__doc__)
     if args['setup']:
         setup(args['<host>'],
+              args['--slot'],
               args['--password-group'],
               args['--image-tag'],
               args['--image-source'],
