@@ -7,14 +7,14 @@ Usage:
 Options:
   --no-verify   Set up configuration files only, don't connect to server
 """
-import docopt
 import glob
 import json
 import os
 import os.path
 import string
 import subprocess
-from subprocess import PIPE
+
+import docopt
 
 
 def setup(verify=False):
