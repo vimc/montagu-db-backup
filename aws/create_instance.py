@@ -12,8 +12,7 @@ def create_instance():
     security_group = get_or_create_security_group()
 
     block_device = {
-        'DeviceName': '/dev/sdb',
-        'VirtualName': 'ephemeral0',
+        'DeviceName': '/dev/sdf',
         'Ebs': {
             'Encrypted': True,
             'DeleteOnTermination': True,
