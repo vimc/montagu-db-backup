@@ -34,8 +34,6 @@ class BarmanInstance(object):
             raise
 
     def wait_for_startup(self):
-        print("Waiting for instance to be running...")
-        self.instance.wait_until_running()
         print("Waiting for DNS...")
         while not self.public_dns_name:
             self.instance.reload()

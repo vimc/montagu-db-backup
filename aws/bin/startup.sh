@@ -19,7 +19,11 @@ mount -a
 
 # Move docker volumes to EBS volume
 systemctl stop docker
-mv /var/lib/docker /mnt/data/var-lib-docker
+if [ -d "/mnt/data/var-lib-docker" ]; then
+    rm -rf /var/lib/docker
+else
+    mv /var/lib/docker /mnt/data/var-lib-docker
+fi
 ln -s /mnt/data/var-lib-docker /var/lib/docker
 systemctl start docker
 
