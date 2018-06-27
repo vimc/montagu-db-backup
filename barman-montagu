@@ -18,6 +18,8 @@ Options:
   --pull-image              Pull image before running?
   --no-clean-on-error       Don't clean up container/volumes on error
   --slot=<slot>             Replication slot to use on the db
+  --volume_data=<volume>    Volume name or path for data [default: barman_data]
+  --volume_logs=<volume>    Volume name or path for logs [default: barman_logs]
 """
 
 import os
@@ -37,7 +39,7 @@ BARMAN_CONTAINER = 'barman-montagu'
 # recover).
 BARMAN_VOLUMES = {
     'data': {'volume': 'barman_data', 'path': '/var/lib/barman'},
-    'libs': {'volume': 'barman_logs', 'path': '/var/log/barman'},
+    'logs': {'volume': 'barman_logs', 'path': '/var/log/barman'},
     'recover': {'volume': 'barman_recover', 'path': '/recover'},
     'nightly': {'volume': 'montagu_db_volume', 'path': '/nightly'}
 }
@@ -112,6 +114,9 @@ def start_barman(host, slot, password_group, tag, registry, pull,
     image_name = '{}/{}:{}'.format(registry, DOCKER_IMAGE, tag)
     volume_mappings = {x['volume']: {'bind': x['path']}
                        for x in BARMAN_VOLUMES.values()}
+    print("Volume mappings: ")
+    print(volume_mappings)
+
     db = DATABASE_NAME.upper()
     environment = {
         'BARMAN_{}_PASS_BACKUP'.format(db): pw['barman'],
@@ -262,6 +267,11 @@ def localhost_ip():
 
 def main():
     args = docopt.docopt(__doc__)
+    if args['--volume_data']:
+        BARMAN_VOLUMES['data']['volume'] = args['--volume_data']
+    if args['--volume_logs']:
+        BARMAN_VOLUMES['logs']['volume'] = args['--volume_logs']
+
     if args['setup']:
         setup(args['<host>'],
               args['--slot'],

@@ -17,14 +17,4 @@ echo $fstab_line | sudo tee --append /etc/fstab
 mkdir -p /mnt/data
 mount -a
 
-# Move docker volumes to EBS volume
-systemctl stop docker
-if [ -d "/mnt/data/var-lib-docker" ]; then
-    rm -rf /var/lib/docker
-else
-    mv /var/lib/docker /mnt/data/var-lib-docker
-fi
-ln -s /mnt/data/var-lib-docker /var/lib/docker
-systemctl start docker
-
 echo "ready" > /home/ubuntu/go_signal
