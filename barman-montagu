@@ -128,7 +128,7 @@ def start_barman(host, slot, password_group, tag, registry, pull,
     if pull:
         print("Pulling image...")
         d.images.pull(image_name)
-    volumes = [volume_create(v['volume'], d) for v in BARMAN_VOLUMES.values()]
+    volumes = [volume_create(v, d) for v in named_volumes()]
     barman = d.containers.run(image_name, name=BARMAN_CONTAINER, detach=True,
                               volumes=volume_mappings, environment=environment,
                               extra_hosts=extra_hosts, network=network)
@@ -143,6 +143,11 @@ def start_barman(host, slot, password_group, tag, registry, pull,
                     v.remove()
         raise
     return barman
+
+
+def named_volumes():
+    return (v['volume'] for v in BARMAN_VOLUMES.values()
+            if not v['volume'].startswith('/'))
 
 
 def vault_client():
