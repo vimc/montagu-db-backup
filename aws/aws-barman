@@ -50,7 +50,7 @@ def status():
 
 if __name__ == '__main__':
     args = docopt(__doc__)
-    instance_name = args["<name>"] or "montagu_barman"
+    instance_name = args["<name>"] or "montagu-barman"
     instance = BarmanInstance(instance_name)
     if args["start"]:
         instance.start()

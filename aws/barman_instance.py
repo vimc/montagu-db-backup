@@ -80,7 +80,7 @@ class BarmanInstance(object):
                     'Values': [self.name]
                 }]
             )
-            finished_statuses = ['shutting-down', 'terminated']
+            finished_statuses = ['terminated']
             all = [i for i in all if i.state['Name'] not in finished_statuses]
             if len(all) > 1:
                 raise Exception("More than one ec2 instance running with "

@@ -9,10 +9,10 @@ ec2 = boto3.resource('ec2')
 
 
 def create_instance(instance_name):
-    group_name = "{}_group".format(instance_name)
+    group_name = "{}-group".format(instance_name)
     security_group = create_security_group(group_name)
 
-    volume_name = "{}_volume".format(instance_name)
+    volume_name = "{}-volume".format(instance_name)
     volume = get_or_create_volume(volume_name)
 
     print("Requesting new instance...")
