@@ -5,7 +5,7 @@ import hvac
 DEFAULT_VAULT_ADDR = "https://support.montagu.dide.ic.ac.uk:8200"
 
 
-def save_securely(path, data):
+def save_securely_to_disk(path, data):
     with open(path, 'a'):  # Create file if does not exist
         pass
     os.chmod(path, 0o600)

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Usage:
-aws-barman start [--no-stop-on-error]
-aws-barman status
-aws-barman stop
-aws-barman startup_log
-aws-barman ssh
+aws-barman status [<name>]
+aws-barman start [<name>] [--no-stop-on-error]
+aws-barman stop [<name>]
+aws-barman startup_log [<name>]
+aws-barman ssh [<name>]
 
 Options:
   --no-stop-on-error    Don't stop and remove in the instance on error
+
+<name> defaults to montagu_barman, and is used to distinguish instances
 """
 
 # https://boto3.readthedocs.io/en/latest/reference/services/ec2.html
@@ -17,7 +19,7 @@ import boto3
 from docopt import docopt
 
 from barman_instance import BarmanInstance
-from vault import save_securely, VaultClient
+from vault import save_securely_to_disk, VaultClient
 
 ec2 = boto3.resource('ec2')
 
@@ -25,7 +27,7 @@ ec2 = boto3.resource('ec2')
 def dump_key(vault: VaultClient):
     if not isfile('montagu-barman.pem'):
         print("Writing private key to ./montagu-barman.pem")
-        save_securely('montagu-barman.pem', vault.ec2_private_key)
+        save_securely_to_disk('montagu-barman.pem', vault.ec2_private_key)
 
 
 def ssh(instance: BarmanInstance, vault: VaultClient):
@@ -48,7 +50,8 @@ def status():
 
 if __name__ == '__main__':
     args = docopt(__doc__)
-    instance = BarmanInstance()
+    instance_name = args["<name>"] or "montagu_barman"
+    instance = BarmanInstance(instance_name)
     if args["start"]:
         instance.start()
     elif args["status"]:

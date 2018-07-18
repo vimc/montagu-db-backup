@@ -4,28 +4,21 @@ from botocore.exceptions import ClientError
 ec2 = boto3.resource('ec2')
 
 
-def catch_client_error(try_block, catch, on_catch=None):
+def get_group_if_exists():
     try:
-        return try_block()
+        groups = list(ec2.security_groups.filter(GroupNames=['montagu-barman']))
+        return groups[0]
     except ClientError as e:
-        if catch in str(e):
-            if on_catch:
-                return on_catch()
+        if "NotFound" in str(e):
+            return None
         else:
             raise e
 
 
-def get_group():
-    groups = list(ec2.security_groups.filter(GroupNames=['montagu-barman']))
-    return groups[0]
-
-
-def create_group():
-    print("Creating new security group...")
-    return ec2.create_security_group(
-        Description='Montagu Barman Security Group',
-        GroupName="montagu-barman"
-    )
+def delete_group_if_already_exists():
+    group = get_group_if_exists()
+    if group:
+        group.delete()
 
 
 def authorize_ingress(group, cidr_ip):
@@ -55,18 +48,20 @@ def authorize_egress(group):
     )
 
 
-def get_or_create_security_group():
-    group = catch_client_error(get_group,
-                               catch="NotFound",
-                               on_catch=create_group)
+def create_security_group(group_name):
+    delete_group_if_already_exists()
+    print("Creating new security group...")
+    group = ec2.create_security_group(
+        Description='Montagu Barman Security Group',
+        GroupName=group_name
+    )
+
     allowed_ingress_ranges = [
-        "129.31.24.0/23",    # All DIDE workstations
+        "129.31.24.0/23",  # All DIDE workstations
         # "129.31.24.0/24",    # All DIDE servers
     ]
 
     for cidr in allowed_ingress_ranges:
-        catch_client_error(lambda: authorize_ingress(group, cidr),
-                           catch="InvalidPermission.Duplicate")
-    catch_client_error(lambda: authorize_egress(group),
-                       catch="InvalidPermission.Duplicate")
+        authorize_ingress(group, cidr)
+    authorize_egress(group)
     return group

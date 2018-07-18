@@ -256,20 +256,6 @@ def resolve_host_ip(host):
         return socket.gethostbyname(host)
 
 
-# NOTE: not terribly portable (probably linux only).  An alternative,
-# but far more cryptic, approach is to use:
-#
-#     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-#         s.connect(('8.8.8.8', 1))
-#         return s.getsockname()[0]
-#
-# which is adapted from various stackoverflow answers.
-def localhost_ip():
-    res = subprocess.run(["hostname", "--ip-address"], check=True,
-                         stdout=subprocess.PIPE)
-    return res.stdout.decode("UTF-8").strip()
-
-
 def main():
     args = docopt.docopt(__doc__)
     if args['--volume_data']:

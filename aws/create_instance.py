@@ -2,15 +2,18 @@ import boto3
 from awscli.customizations.emr.constants import EC2
 
 from create_volume import get_or_create_volume
-from security_group import get_or_create_security_group
+from security_group import create_security_group
 from settings import machine_image, instance_type, key_name
 
 ec2 = boto3.resource('ec2')
 
 
-def create_instance():
-    security_group = get_or_create_security_group()
-    volume = get_or_create_volume()
+def create_instance(instance_name):
+    group_name = "{}_group".format(instance_name)
+    security_group = create_security_group(group_name)
+
+    volume_name = "{}_volume".format(instance_name)
+    volume = get_or_create_volume(volume_name)
 
     print("Requesting new instance...")
     instances: EC2.Instance = ec2.create_instances(
@@ -23,7 +26,7 @@ def create_instance():
         TagSpecifications=[
             {
                 'ResourceType': 'instance',
-                'Tags': [{'Key': 'name', 'Value': 'montagu-barman'}]
+                'Tags': [{'Key': 'name', 'Value': instance_name}]
             }
         ],
         SecurityGroupIds=[security_group.id],
@@ -35,6 +38,8 @@ def create_instance():
     instance.wait_until_running()
 
     print("Attaching EBS volume...")
+    # For reasons best known to itself, EC2 maps /dev/sdf to /dev/xvdf, but you
+    # can't just attach directly to /dev/xvdf
     instance.attach_volume(
         Device="/dev/sdf",
         VolumeId=volume.id

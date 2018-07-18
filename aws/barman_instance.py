@@ -9,7 +9,7 @@ from vault import VaultClient
 
 
 class BarmanInstance(object):
-    def __init__(self, name="montagu-barman", ec2=None, vault=VaultClient()):
+    def __init__(self, name, ec2=None, vault=VaultClient()):
         self.name = name
         self.ec2 = ec2 or boto3.resource('ec2')
         self._instance: EC2.Instance = None
@@ -23,7 +23,7 @@ class BarmanInstance(object):
         if self.instance:
             raise Exception("Cannot start another instance: already running")
 
-        self._instance = create_instance()
+        self._instance = create_instance(self.name)
         print("Id: " + self.id)
         try:
             self.wait_for_startup()

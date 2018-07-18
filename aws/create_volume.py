@@ -3,19 +3,18 @@ import boto3
 from settings import kms_key_id, volume_size, volume_type
 
 ec2 = boto3.resource('ec2')
-volume_name = "montagu_barman_volume"
 
 
-def volume_matches(v):
+def volume_matches(v, volume_name):
     if v.tags:
         return any(t for t in v.tags
-               if t['Key'] == 'Name' and t['Value'] == volume_name)
+                   if t['Key'] == 'Name' and t['Value'] == volume_name)
     else:
         return False
 
 
-def get_or_create_volume():
-    volumes = [v for v in ec2.volumes.all() if volume_matches(v)]
+def get_or_create_volume(volume_name):
+    volumes = [v for v in ec2.volumes.all() if volume_matches(v, volume_name)]
     count = len(volumes)
     if count > 1:
         raise Exception("More than one barman volume exists in AWS")
@@ -29,10 +28,10 @@ def get_or_create_volume():
         return volume
     else:
         print("Volume does not exist, creating...")
-        return create_volume()
+        return create_volume(volume_name)
 
 
-def create_volume():
+def create_volume(volume_name):
     return ec2.create_volume(
         AvailabilityZone="eu-west-2a",
         Encrypted=True,
@@ -45,7 +44,7 @@ def create_volume():
                 'Tags': [
                     {
                         'Key': "Name",
-                        'Value': "montagu_barman_volume"
+                        'Value': volume_name
                     }
                 ]
             }
