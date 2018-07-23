@@ -18,3 +18,7 @@ key_name = 'montagu-barman'
 # This is an EBS key managed by Amazon KMS, it's not the same as the
 # key referred to by settings.key_name
 kms_key_id = 'cf0192d9-10be-4561-8d31-fbe32c11a048'
+
+# Doesn't matter too much, so long as it's in Europe and it matches for both
+# volume and instance
+availability_zone = "eu-west-2a"

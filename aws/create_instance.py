@@ -3,7 +3,7 @@ from awscli.customizations.emr.constants import EC2
 
 from create_volume import get_or_create_volume
 from security_group import create_security_group
-from settings import machine_image, instance_type, key_name
+from settings import machine_image, instance_type, key_name, availability_zone
 
 ec2 = boto3.resource('ec2')
 
@@ -23,6 +23,9 @@ def create_instance(instance_name):
         KeyName=key_name,
         MaxCount=1,
         MinCount=1,
+        Placement={
+            'AvailabilityZone': availability_zone
+        },
         TagSpecifications=[
             {
                 'ResourceType': 'instance',

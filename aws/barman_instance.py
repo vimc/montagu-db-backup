@@ -51,6 +51,7 @@ class BarmanInstance(object):
         if self.exists:
             print("Requesting termination of {}".format(self.instance.id))
             self.instance.terminate()
+            self.instance.wait_until_terminated()
 
     def get_startup_log(self):
         if self.exists:

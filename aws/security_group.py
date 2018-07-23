@@ -4,9 +4,9 @@ from botocore.exceptions import ClientError
 ec2 = boto3.resource('ec2')
 
 
-def get_group_if_exists():
+def get_group_if_exists(group_name):
     try:
-        groups = list(ec2.security_groups.filter(GroupNames=['montagu-barman']))
+        groups = list(ec2.security_groups.filter(GroupNames=[group_name]))
         return groups[0]
     except ClientError as e:
         if "NotFound" in str(e):
@@ -15,9 +15,10 @@ def get_group_if_exists():
             raise e
 
 
-def delete_group_if_already_exists():
-    group = get_group_if_exists()
+def delete_group_if_already_exists(group_name):
+    group = get_group_if_exists(group_name)
     if group:
+        print("Deleting existing security group...")
         group.delete()
 
 
@@ -49,7 +50,7 @@ def authorize_egress(group):
 
 
 def create_security_group(group_name):
-    delete_group_if_already_exists()
+    delete_group_if_already_exists(group_name)
     print("Creating new security group...")
     group = ec2.create_security_group(
         Description='Montagu Barman Security Group',

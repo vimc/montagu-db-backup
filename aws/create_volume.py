@@ -1,6 +1,6 @@
 import boto3
 
-from settings import kms_key_id, volume_size, volume_type
+from settings import kms_key_id, volume_size, volume_type, availability_zone
 
 ec2 = boto3.resource('ec2')
 
@@ -33,7 +33,7 @@ def get_or_create_volume(volume_name):
 
 def create_volume(volume_name):
     return ec2.create_volume(
-        AvailabilityZone="eu-west-2a",
+        AvailabilityZone=availability_zone,
         Encrypted=True,
         KmsKeyId=kms_key_id,
         Size=volume_size,
