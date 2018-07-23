@@ -20,6 +20,10 @@ Options:
   --slot=<slot>             Replication slot to use on the db
   --volume_data=<volume>    Volume name or path for data [default: barman_data]
   --volume_logs=<volume>    Volume name or path for logs [default: barman_logs]
+  --volume_recover=<volume> Volume name or path for recovery
+                            [default: barman_recover]
+  --volume_nightly<volume>  Volume name or path for nightly recover
+                            [default: montagu_db_volume]
 """
 
 import os
@@ -256,12 +260,16 @@ def resolve_host_ip(host):
         return socket.gethostbyname(host)
 
 
+def handle_volume_args(args):
+    for volume in ['data', 'logs', 'nightly', 'recover']:
+        arg = "--volume_" + volume
+        if args[arg]:
+            BARMAN_VOLUMES[volume]['volume'] = args[arg]
+
+
 def main():
     args = docopt.docopt(__doc__)
-    if args['--volume_data']:
-        BARMAN_VOLUMES['data']['volume'] = args['--volume_data']
-    if args['--volume_logs']:
-        BARMAN_VOLUMES['logs']['volume'] = args['--volume_logs']
+    handle_volume_args(args)
 
     if args['setup']:
         setup(args['<host>'],
