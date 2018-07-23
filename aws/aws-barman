@@ -9,7 +9,7 @@ aws-barman ssh [<name>]
 Options:
   --no-stop-on-error    Don't stop and remove in the instance on error
 
-<name> defaults to montagu_barman, and is used to distinguish instances
+<name> defaults to montagu-barman, and is used to distinguish instances
 """
 
 # https://boto3.readthedocs.io/en/latest/reference/services/ec2.html
