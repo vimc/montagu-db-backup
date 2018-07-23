@@ -20,10 +20,8 @@ Options:
   --slot=<slot>             Replication slot to use on the db
   --volume_data=<volume>    Volume name or path for data [default: barman_data]
   --volume_logs=<volume>    Volume name or path for logs [default: barman_logs]
-  --volume_recover=<volume> Volume name or path for recovery
-                            [default: barman_recover]
-  --volume_nightly<volume>  Volume name or path for nightly recover
-                            [default: montagu_db_volume]
+  --volume_recover=<volume> Volume name or path for recovery [default: barman_recover]
+  --volume_nightly<volume>  Volume name or path for nightly recover [default: montagu_db_volume]
 """
 
 import os
@@ -263,7 +261,7 @@ def resolve_host_ip(host):
 def handle_volume_args(args):
     for volume in ['data', 'logs', 'nightly', 'recover']:
         arg = "--volume_" + volume
-        if args[arg]:
+        if arg in args:
             BARMAN_VOLUMES[volume]['volume'] = args[arg]
 
 
