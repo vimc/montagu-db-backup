@@ -11,13 +11,18 @@ cd montagu-db/backup
 git checkout master
 pip3 install -r requirements.txt
 
-# -M -S - Set up SSH in (M)aster mode for connection sharing via the specified
-#         (S)ocket file
-# -nNT  - Don't read, do anything remotely, or allocate a remote terminal
+# autossh monitors the SSH connection and restarts it if it drops
+# autossh options
+# -M    - A free port to use for autossh to monitor its own status
 # -f    - Run in background
+
+# options passed through to each SSH connection
+# -S    - Specify socket file so we can check the connection is up
+# -nNT  - Don't read, do anything remotely, or allocate a remote terminal
 # -p    - Connect to SSH server on 10022, as production has a non-standard port
 # -L    - Sets up tunnel from local port to remote host & port
-ssh -M -S socket \
+autossh -M 20000 \
+    -S socket \
     -nNT \
     -f \
     -p 10022 \
