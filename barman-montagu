@@ -20,8 +20,10 @@ Options:
   --slot=<slot>             Replication slot to use on the db
   --volume_data=<volume>    Volume name or path for data [default: barman_data]
   --volume_logs=<volume>    Volume name or path for logs [default: barman_logs]
-  --volume_recover=<volume> Volume name or path for recovery [default: barman_recover]
-  --volume_nightly<volume>  Volume name or path for nightly recover [default: montagu_db_volume]
+  --volume_recover=<volume> Volume name or path for recovery
+                            [default: barman_recover]
+  --volume_nightly<volume>  Volume name or path for nightly recover
+                            [default: montagu_db_volume]
 """
 
 import os
@@ -113,7 +115,10 @@ def start_barman(host, slot, password_group, tag, registry, pull,
         return barman
 
     pw = get_barman_passwords(password_group)
-    image_name = '{}/{}:{}'.format(registry, DOCKER_IMAGE, tag)
+
+    image_name = '{}:{}'.format(DOCKER_IMAGE, tag)
+    if registry:
+        image_name = '{}/{}'.format(registry, image_name)
     volume_mappings = {x['volume']: {'bind': x['path']}
                        for x in BARMAN_VOLUMES.values()}
     print("Volume mappings: ")
@@ -133,7 +138,8 @@ def start_barman(host, slot, password_group, tag, registry, pull,
     volumes = [volume_create(v, d) for v in named_volumes()]
     barman = d.containers.run(image_name, name=BARMAN_CONTAINER, detach=True,
                               volumes=volume_mappings, environment=environment,
-                              extra_hosts=extra_hosts, network=network)
+                              extra_hosts=extra_hosts, network=network,
+                              ports={"5000": 5000})
     try:
         exec_safely(barman, ["setup-barman"], check=True, stream=True)
     except:

@@ -8,7 +8,8 @@ RUN apt-get update && \
                 cron \
                 python3-pip \
                 python3-setuptools \
-                wget
+                wget \
+                python-flask
 
 RUN pip3 install docopt
 
@@ -28,4 +29,12 @@ VOLUME /nightly
 COPY etc /etc
 COPY bin /usr/local/bin
 
-ENTRYPOINT ["idle"]
+WORKDIR /app
+COPY metrics/requirements.txt .
+RUN pip3 install -r requirements.txt
+COPY metrics /app
+ENV FLASK_APP=main.py
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+
+ENTRYPOINT ["flask", "run", "--host=0.0.0.0"]
