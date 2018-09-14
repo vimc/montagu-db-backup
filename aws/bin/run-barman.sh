@@ -29,9 +29,6 @@ autossh -M 20000 \
     -L 5432:$db_host:5432 \
     $user_and_host
 
-# Check the connection is up
-ssh -S socket -O check $user_and_host
-
 # -u makes Python not buffer stdout, so we can monitor remotely
 # localhost is forwarded by SSH to the true host
 # For unknown reasons, this line refuses to break over multiple lines
