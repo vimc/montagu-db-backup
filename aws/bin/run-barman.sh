@@ -17,12 +17,10 @@ pip3 install -r requirements.txt
 # -f    - Run in background
 
 # options passed through to each SSH connection
-# -S    - Specify socket file so we can check the connection is up
 # -nNT  - Don't read, do anything remotely, or allocate a remote terminal
 # -p    - Connect to SSH server on 10022, as production has a non-standard port
 # -L    - Sets up tunnel from local port to remote host & port
 autossh -M 20000 \
-    -S socket \
     -nNT \
     -f \
     -p 10022 \
