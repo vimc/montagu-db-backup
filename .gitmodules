@@ -1,0 +1,3 @@
+[submodule "aws/vault"]
+	path = aws/vault
+	url = https://github.com/vimc/montagu-vault-py

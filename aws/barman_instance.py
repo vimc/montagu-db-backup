@@ -5,11 +5,11 @@ from awscli.customizations.emr.constants import EC2
 
 from barman_ssh_client import BarmanSSHClient
 from create_instance import create_instance
-from vault import VaultClient
+from secrets import AWSVaultClient
 
 
 class BarmanInstance(object):
-    def __init__(self, name, ec2=None, vault=VaultClient()):
+    def __init__(self, name, ec2=None, vault=AWSVaultClient()):
         self.name = name
         self.ec2 = ec2 or boto3.resource('ec2')
         self._instance: EC2.Instance = None
