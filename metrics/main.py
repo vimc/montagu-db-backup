@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-from datetime import datetime, timezone
-
-from dateutil import parser
+import os
+from datetime import datetime
 from subprocess import PIPE, run
 
+from dateutil import parser
 from flask import Flask
 
-from metrics import render_metrics
+from metrics import render_metrics, label_metrics
 
-DATABASE_NAME = "montagu"
+DATABASE_NAME = os.environ['BARMAN_DATABASE_NAME']
 app = Flask(__name__)
 
 
@@ -55,4 +55,5 @@ def metrics():
         ms = parse_status(result.stdout)
     else:
         ms = {"barman_running": False}
+    ms = label_metrics(ms, {"database": DATABASE_NAME})
     return render_metrics(ms)
