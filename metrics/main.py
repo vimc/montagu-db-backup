@@ -27,32 +27,47 @@ def parse_timestamp(raw):
         return None
 
 
-def parse_status(text):
-    lines = text.split("\n")
+def without_first_line(text):
+    return text.split("\n")[1:]
+
+
+def parse_status(status, check):
+    lines = without_first_line(status) + without_first_line(check)
     raw_values = {}
-    for line in lines[1:]:
+    for line in lines:
         if line:
             print(line, flush=True)
             k, v = line.split(": ", 1)
             raw_values[k.strip()] = v.strip()
 
-    last_available = parse_timestamp(raw_values["First available backup"])
+    last_available = parse_timestamp(raw_values["Last available backup"])
+    since_last_backup = seconds_elapsed_since(last_available)
+    ok = check_booleans(raw_values, [
+        "Active", "PostgreSQL", "PostgreSQL_streaming", "wal_level",
+        "replication slot", "directories", "retention policy settings",
+        "compresion settings", "failed backups", "pg_basebackup",
+        "pg_basebackup")
+
     return {
         "barman_running": True,
-        "barman_active": raw_values["Active"] == "True",
+        "barman_ok": raw_values["Active"] == "True",
         "barman_pg_version": raw_values["PostgreSQL version"],
         "barman_available_backups": raw_values["No. of available backups"],
-        "barman_time_since_last_backup_seconds": seconds_elapsed_since(
-            last_available)
+        "barman_time_since_last_backup_seconds": since_last_backup,
+        "barman_time_since_last_backup_minutes": since_last_backup / 60,
+        "barman_time_since_last_backup_hours": since_last_backup / 3600,
+        "barman_time_since_last_backup_days": since_last_backup / (3600 * 24)
     }
 
 
 @app.route('/metrics')
 def metrics():
-    result = run(["barman", "status", DATABASE_NAME],
+    status = run(["barman", "status", DATABASE_NAME],
                  stdout=PIPE, universal_newlines=True)
-    if result.returncode == 0:
-        ms = parse_status(result.stdout)
+    check = run(["barman", "check", DATABASE_NAME],
+                 stdout=PIPE, universal_newlines=True)
+    if status.returncode == 0 and check.returncode == 0:
+        ms = parse_status(status.stdout, check.stdout)
     else:
         ms = {"barman_running": False}
     ms = label_metrics(ms, {"database": DATABASE_NAME})
