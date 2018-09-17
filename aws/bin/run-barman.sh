@@ -11,6 +11,7 @@ cd montagu-db/backup
 git checkout master
 pip3 install -r requirements.txt
 
+# http://www.harding.motd.ca/autossh/README.txt
 # autossh monitors the SSH connection and restarts it if it drops
 # autossh options
 # -M    - A free port to use for autossh to monitor its own status
