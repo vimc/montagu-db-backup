@@ -66,7 +66,7 @@ Or, for local testing you would want:
 barman-montagu setup --pull-image --slot barman localhost
 ```
 
-Or, for testing a locally build barman image, something like:
+Or, for testing a locally built barman image, something like:
 
 ```
 docker build --tag montagu-barman:test .

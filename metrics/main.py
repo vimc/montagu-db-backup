@@ -31,28 +31,30 @@ def without_first_line(text):
     return text.split("\n")[1:]
 
 
-def parse_status(status, check):
-    lines = without_first_line(status) + without_first_line(check)
+def barman_output_as_dict(text):
+    lines = text.split("\n")[1:]
     raw_values = {}
     for line in lines:
         if line:
             print(line, flush=True)
             k, v = line.split(": ", 1)
             raw_values[k.strip()] = v.strip()
+    return raw_values
 
-    last_available = parse_timestamp(raw_values["Last available backup"])
+
+def parse_status(status, check):
+    status_values = barman_output_as_dict(status)
+    check_values = barman_output_as_dict(check)
+
+    last_available = parse_timestamp(status_values["Last available backup"])
     since_last_backup = seconds_elapsed_since(last_available)
-    ok = check_booleans(raw_values, [
-        "Active", "PostgreSQL", "PostgreSQL_streaming", "wal_level",
-        "replication slot", "directories", "retention policy settings",
-        "compresion settings", "failed backups", "pg_basebackup",
-        "pg_basebackup")
+    check_all_ok = all(x.startswith("OK") for x in check_values.values())
 
     return {
         "barman_running": True,
-        "barman_ok": raw_values["Active"] == "True",
-        "barman_pg_version": raw_values["PostgreSQL version"],
-        "barman_available_backups": raw_values["No. of available backups"],
+        "barman_ok": status_values["Active"] == "True" and check_all_ok,
+        "barman_pg_version": status_values["PostgreSQL version"],
+        "barman_available_backups": status_values["No. of available backups"],
         "barman_time_since_last_backup_seconds": since_last_backup,
         "barman_time_since_last_backup_minutes": since_last_backup / 60,
         "barman_time_since_last_backup_hours": since_last_backup / 3600,
