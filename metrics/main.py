@@ -68,9 +68,6 @@ def metrics():
                  stdout=PIPE, universal_newlines=True)
     check = run(["barman", "check", DATABASE_NAME],
                  stdout=PIPE, universal_newlines=True)
-    if status.returncode == 0 and check.returncode == 0:
-        ms = parse_status(status.stdout, check.stdout)
-    else:
-        ms = {"barman_running": False}
+    ms = parse_status(status.stdout, check.stdout)
     ms = label_metrics(ms, {"database": DATABASE_NAME})
     return render_metrics(ms)
