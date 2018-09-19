@@ -78,9 +78,25 @@ docker build --tag montagu-barman:test .
     localhost
 ```
 
-
 Currently the port 5432 is assumed.
 
+## Monitoring barman
+Barman serves up OpenTSDB formatted (i.e. Prometheus-compatible) metrics
+at port 5000 on the host machine it is run on, using a Flask app that we
+wrote. It should give you output in roughly this format:
+
+```
+barman_running{database="montagu"} 1
+barman_ok{database="montagu"} 1
+barman_pg_version{database="montagu"} 10.3
+barman_available_backups{database="montagu"} 1
+barman_time_since_last_backup_seconds{database="montagu"} 54.008972
+barman_time_since_last_backup_minutes{database="montagu"} 0.9001495333333334
+barman_time_since_last_backup_hours{database="montagu"} 0.015002492222222222
+barman_time_since_last_backup_days{database="montagu"} 0.0006251038425925926
+```
+
+## Interacting with barman
 To see a set of status information run
 
 ```
