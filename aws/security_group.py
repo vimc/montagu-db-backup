@@ -22,12 +22,12 @@ def delete_group_if_already_exists(group_name):
         group.delete()
 
 
-def authorize_ingress(group, cidr_ip):
+def authorize_ingress(group, cidr_ip, port):
     group.authorize_ingress(
         CidrIp=cidr_ip,
         IpProtocol="tcp",
-        FromPort=22,
-        ToPort=22
+        FromPort=port,
+        ToPort=port
     )
 
 
@@ -63,6 +63,8 @@ def create_security_group(group_name):
     ]
 
     for cidr in allowed_ingress_ranges:
-        authorize_ingress(group, cidr)
+        authorize_ingress(group, cidr, port=22)
+        authorize_ingress(group, cidr, port=5000)
+
     authorize_egress(group)
     return group
