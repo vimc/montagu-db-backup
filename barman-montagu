@@ -126,9 +126,12 @@ def start_barman(host, slot, password_group, tag, registry, pull,
 
     db = DATABASE_NAME.upper()
     environment = {
+        # These values are substituted into montagu.json in barman.d.in, and
+        # affect Barman
         'BARMAN_{}_PASS_BACKUP'.format(db): pw['barman'],
         'BARMAN_{}_PASS_STREAM'.format(db): pw['streaming_barman'],
         'BARMAN_{}_SLOT_NAME'.format(db): slot,
+        # This value is used by the Flask metrics app (in ./metrics)
         'BARMAN_DATABASE_NAME': DATABASE_NAME
     }
     extra_hosts = {'db': resolve_host_ip(host)}
