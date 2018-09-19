@@ -32,6 +32,9 @@ COPY bin /usr/local/bin
 WORKDIR /app
 COPY metrics/requirements.txt .
 RUN pip3 install -r requirements.txt
+COPY metrics/montagu_metrics/requirements.txt montagu_metrics/requirements.txt
+RUN pip3 install -r montagu_metrics/requirements.txt
+
 COPY metrics /app
 ENV FLASK_APP=main.py
 ENV LC_ALL=C.UTF-8
