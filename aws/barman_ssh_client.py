@@ -4,11 +4,11 @@ from time import sleep
 from paramiko import SSHClient, AutoAddPolicy, RSAKey
 from scp import SCPClient
 
-from vault import VaultClient
+from secrets import AWSVaultClient
 
 
 class BarmanSSHClient(object):
-    def __init__(self, host: str, vault: VaultClient):
+    def __init__(self, host: str, vault: AWSVaultClient):
         self.host = host
         self.username = "ubuntu"
         self.client: SSHClient = None

@@ -3,7 +3,7 @@ EBS=/dev/xvdf
 
 set -ex
 apt-get update
-apt-get install -y python3-pip
+apt-get install -y python3-pip autossh
 
 usermod -aG docker ubuntu
 

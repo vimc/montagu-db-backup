@@ -19,18 +19,18 @@ import boto3
 from docopt import docopt
 
 from barman_instance import BarmanInstance
-from vault import save_securely_to_disk, VaultClient
+from secrets import AWSVaultClient, save_securely_to_disk
 
 ec2 = boto3.resource('ec2')
 
 
-def dump_key(vault: VaultClient):
+def dump_key(vault: AWSVaultClient):
     if not isfile('montagu-barman.pem'):
         print("Writing private key to ./montagu-barman.pem")
         save_securely_to_disk('montagu-barman.pem', vault.ec2_private_key)
 
 
-def ssh(instance: BarmanInstance, vault: VaultClient):
+def ssh(instance: BarmanInstance, vault: AWSVaultClient):
     if instance.exists:
         dump_key(vault)
         suggested_cmd = "ssh -i ./montagu-barman.pem ubuntu@{}".format(
@@ -59,6 +59,6 @@ if __name__ == '__main__':
     elif args["stop"]:
         instance.stop()
     elif args["ssh"]:
-        ssh(instance, VaultClient())
+        ssh(instance, AWSVaultClient())
     elif args["startup_log"]:
         print(instance.get_startup_log())
