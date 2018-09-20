@@ -96,6 +96,12 @@ barman_time_since_last_backup_hours{database="montagu"} 0.015002492222222222
 barman_time_since_last_backup_days{database="montagu"} 0.0006251038425925926
 ```
 
+Prometheus adds two labels to every metric: instance_name and job. Plus we
+have a manual label here: database. So if we have two barman instances
+tracking the same db (as we do: production and AWS) they will differ by
+instance_name. And if they are tracking different databases they will also
+differ by database.
+
 ## Interacting with barman
 To see a set of status information run
 
