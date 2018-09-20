@@ -6,10 +6,10 @@ FROM ubuntu:16.04
 RUN apt-get update && \
         apt-get install -y --no-install-recommends \
                 cron \
+                python-flask \
                 python3-pip \
                 python3-setuptools \
-                wget \
-                python-flask
+                wget
 
 RUN pip3 install docopt
 
