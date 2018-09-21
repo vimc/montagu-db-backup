@@ -162,6 +162,30 @@ barman-montagu destroy
 The `barman-montagu` script does not depend on its location and can be moved to
 a position within `$PATH`.
 
+## About the connections
+
+Each of the barman instances will use up to two connections - one for the streaming wal and the other for a base backup.
+
+You can see what is connected by logging onto production with `psql` and running
+
+```
+select usename, application_name, client_addr, backend_start, state_change
+ from pg_stat_activity where application_name like '%barman%';
+```
+
+which will look like this:
+
+```
+     usename      |    application_name     | client_addr  |         backend_start         |         state_change
+------------------+-------------------------+--------------+-------------------------------+-------------------------------
+ streaming_barman | barman_streaming_backup | 129.31.26.49 | 2018-09-21 13:33:31.587082+00 | 2018-09-21 13:33:31.590201+00
+ streaming_barman | barman_streaming_backup | 129.31.26.29 | 2018-09-21 13:29:47.57013+00  | 2018-09-21 13:29:47.586758+00
+ streaming_barman | barman_receive_wal      | 129.31.26.29 | 2018-09-21 13:28:02.92548+00  | 2018-09-21 13:28:02.946786+00
+ streaming_barman | barman_receive_wal      | 129.31.26.49 | 2018-09-21 12:50:02.129403+00 | 2018-09-21 12:50:02.132366+00
+```
+
+The IP address for the aws machine will show up as production (129.31.26.29) and we think that's because of the ssh tunnel.
+
 ## Updating the barman container
 
 We want to deploy a new version of barman to run, but keep all the data intact. This is the proceedure
