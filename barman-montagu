@@ -13,8 +13,8 @@ Usage:
 Options:
   --password-group=<group>  Password group [default: production]
   --image-tag=<tag>         Barman image tag [default: master]
-  --image-source=<repo>     The Docker registry to pull from [default:
-  docker.montagu.dide.ic.ac.uk:5000]
+  --image-source=<repo>     The Docker registry to pull from
+                            [default: docker.montagu.dide.ic.ac.uk:5000]
   --pull-image              Pull image before running?
   --no-clean-on-error       Don't clean up container/volumes on error
   --slot=<slot>             Replication slot to use on the db
@@ -24,6 +24,7 @@ Options:
                             [default: barman_recover]
   --volume_nightly<volume>  Volume name or path for nightly recover
                             [default: montagu_db_volume]
+  --no-initial-backup       Skip the initial backup
 """
 
 import os
@@ -51,9 +52,10 @@ DATABASE_NAME = "montagu"
 DOCKER_IMAGE = "montagu-barman"
 
 
-def setup(host, slot, password_group, tag, registry, pull, clean_on_error):
+def setup(host, slot, password_group, tag, registry, pull, clean_on_error,
+          no_initial_backup):
     start_barman(host, slot, password_group, tag, registry, pull,
-                 clean_on_error)
+                 clean_on_error, no_initial_backup)
 
 
 def status():
@@ -106,7 +108,7 @@ def destroy():
 
 
 def start_barman(host, slot, password_group, tag, registry, pull,
-                 clean_on_error):
+                 clean_on_error, no_initial_backup):
     d = docker.client.from_env()
     barman = get_barman_container(error=False)
     if barman:
@@ -144,8 +146,13 @@ def start_barman(host, slot, password_group, tag, registry, pull,
                               volumes=volume_mappings, environment=environment,
                               extra_hosts=extra_hosts, network=network,
                               ports={"5000": 5000})
+
+    args = ["setup-barman"]
+    if no_initial_backup:
+        args.append("--no-initial-backup")
+    print("Running: {} in container".format(" ".join(args)))
     try:
-        exec_safely(barman, ["setup-barman"], check=True, stream=True)
+        exec_safely(barman, args, check=True, stream=True)
     except:
         if clean_on_error:
             print("Cleaning up before exit")
@@ -286,6 +293,7 @@ def main():
               args['--image-tag'],
               args['--image-source'],
               args['--pull-image'],
+              args['--no-initial-backup'],
               not args['--no-clean-on-error'])
     elif args['status']:
         status()

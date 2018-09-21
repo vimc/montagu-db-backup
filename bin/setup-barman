@@ -2,10 +2,11 @@
 """Deploy montagu
 
 Usage:
-  setup-barman [--no-verify]
+  setup-barman [options]
 
 Options:
-  --no-verify   Set up configuration files only, don't connect to server
+  --no-verify          Set up configuration files only, don't connect to server
+  --no-initial-backup  Skip the initial backup (only run if verifying anyway)
 """
 import glob
 import json
@@ -26,10 +27,11 @@ def setup(verify=False):
     return conf
 
 
-def verify(conf):
+def verify(conf, intial_backup):
     for x in conf:
         test_connections(x)
-    initial_backup(conf)
+    if initial_backup:
+        initial_backup(conf)
     setup_cron(conf)
 
 
@@ -143,4 +145,4 @@ if __name__ == "__main__":
     args = docopt.docopt(__doc__)
     conf = setup()
     if not args["--no-verify"]:
-        verify(conf)
+        verify(conf, not args["--no-initial-backup"])
