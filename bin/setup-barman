@@ -30,8 +30,8 @@ def setup(verify=False):
 def verify(conf, intial_backup):
     for x in conf:
         test_connections(x)
-    # if initial_backup:
-    #     initial_backup(conf)
+    if initial_backup:
+        initial_backup(conf)
     setup_cron(conf)
 
 
