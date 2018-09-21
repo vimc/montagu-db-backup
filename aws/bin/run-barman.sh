@@ -31,4 +31,4 @@ autossh -M 20000 \
 # -u makes Python not buffer stdout, so we can monitor remotely
 # localhost is forwarded by SSH to the true host
 # For unknown reasons, this line refuses to break over multiple lines
-python3 -u ./barman-montagu setup --pull-image --image-source=vimc --no-clean-on-error --slot=barman_aws --volume_data=/mnt/data/barman_data --volume_logs=/mnt/data/barman_logs --volume_recover=/mnt/data/barman_recover localhost
+python3 -u ./barman-montagu setup --pull-image --image-source=vimc --no-clean-on-error --no-initial-backup --slot=barman_aws --volume_data=/mnt/data/barman_data --volume_logs=/mnt/data/barman_logs --volume_recover=/mnt/data/barman_recover localhost
