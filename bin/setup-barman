@@ -27,10 +27,10 @@ def setup(verify=False):
     return conf
 
 
-def verify(conf, intial_backup):
+def verify(conf, no_initial_backup):
     for x in conf:
         test_connections(x)
-    if initial_backup:
+    if not no_initial_backup:
         initial_backup(conf)
     setup_cron(conf)
 
@@ -146,4 +146,4 @@ if __name__ == "__main__":
     conf = setup()
     print("Arguments: {}".format(args))
     if not args["--no-verify"]:
-        verify(conf, not args["--no-initial-backup"])
+        verify(conf, args["--no-initial-backup"])
