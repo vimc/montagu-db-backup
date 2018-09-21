@@ -162,6 +162,16 @@ barman-montagu destroy
 The `barman-montagu` script does not depend on its location and can be moved to
 a position within `$PATH`.
 
+## Updating the barman container
+
+We want to deploy a new version of barman to run, but keep all the data intact. This is the proceedure
+
+* Log in to `annex.montagu` and go to `montagu-db-backup/backup`
+* Update the repo as required
+* `docker stop barman-montagu`
+* `docker rm barman-montagu`
+* `./barman-montagu setup --pull-image --slot barman --no-initial-backup production.montagu.dide.ic.ac.uk`
+
 ## Development notes
 
 This directory creates a new docker image (`vimc/montagu-barman` http://www.pgbarman.org/).
