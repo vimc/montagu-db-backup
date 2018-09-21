@@ -16,7 +16,7 @@ def create_instance(instance_name):
     volume = get_or_create_volume(volume_name)
 
     print("Requesting new instance...")
-    instances: EC2.Instance = ec2.create_instances(
+    instances = ec2.create_instances(
         DryRun=False,
         ImageId=machine_image,
         InstanceType=instance_type,

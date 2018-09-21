@@ -12,7 +12,7 @@ class BarmanInstance(object):
     def __init__(self, name, ec2=None, vault=AWSVaultClient()):
         self.name = name
         self.ec2 = ec2 or boto3.resource('ec2')
-        self._instance: EC2.Instance = None
+        self._instance = None
         self.vault = vault
 
     @property

@@ -11,7 +11,7 @@ class BarmanSSHClient(object):
     def __init__(self, host: str, vault: AWSVaultClient):
         self.host = host
         self.username = "ubuntu"
-        self.client: SSHClient = None
+        self.client = None
         self.vault = vault
 
     def connect(self):
