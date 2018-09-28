@@ -58,8 +58,13 @@ def create_security_group(group_name):
     )
 
     allowed_ingress_ranges = [
-        "129.31.24.0/23",  # All DIDE workstations
-        # "129.31.24.0/24",    # All DIDE servers
+        # http://jodies.de/ipcalc?host=129.31.24.0&mask1=23&mask2=
+        # All DIDE workstations: 129.31.24.1 ... 129.31.25.254
+        # /24 is DIDE *servers* covering only up to 129.31.24.254
+        # (larger mask size, fewer addresses unmasked)
+        "129.31.24.0/23",
+        # Support
+        "129.31.26.30/32"
     ]
 
     for cidr in allowed_ingress_ranges:
