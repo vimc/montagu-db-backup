@@ -1,13 +1,15 @@
 # Barman on AWS
-First time only, run:
+The first time you use these scripts on your machine run:
 
 1. `sudo -H ./prepare`
-2. `aws configure`
-
-The region should be `eu-west-2`.  To create a new key see [the wiki](https://github.com/vimc/vimc-wiki/wiki/AWS-things)
+2. `aws configure`. You will be promoted to enter your AWS credentials and a region.
+    To create a new key see [the wiki](https://github.com/vimc/vimc-wiki/wiki/AWS-things)
+    The region should be `eu-west-2`.
 
 Then run `./aws-barman` to see all options, or `./aws-barman start` to start a
 new instance.
+
+Note `aws-barman stop` will destroy the existing EC2 instance.
 
 To interact directly with barman in the aws machine:
 

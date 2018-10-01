@@ -17,4 +17,13 @@ echo $fstab_line | sudo tee --append /etc/fstab
 mkdir -p /mnt/data
 mount -a
 
+# Enable swap
+dd if=/dev/zero of=/var/swap.1 bs=1M count=2048
+mkswap /var/swap.1
+chmod 600 /var/swap.1
+swapon /var/swap.1
+
+fstab_line="/var/swap.1   swap    swap    defaults        0   0"
+echo $fstab_line | sudo tee --append /etc/fstab
+
 echo "ready" > /home/ubuntu/go_signal
