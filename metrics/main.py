@@ -43,39 +43,39 @@ def barman_output_as_dict(text):
 
 
 def parse_status(status, check):
-    try:
-        status_values = barman_output_as_dict(status)
-        check_values = barman_output_as_dict(check)
+    status_values = barman_output_as_dict(status)
+    check_values = barman_output_as_dict(check)
 
-        last_available = parse_timestamp(status_values["Last available backup"])
-        since_last_backup = seconds_elapsed_since(last_available)
-        check_all_ok = all(x.startswith("OK") for x in check_values.values())
+    last_available = parse_timestamp(status_values["Last available backup"])
+    since_last_backup = seconds_elapsed_since(last_available)
+    check_all_ok = all(x.startswith("OK") for x in check_values.values())
 
-        return {
-            "barman_running": True,
-            "barman_ok": status_values["Active"] == "True" and check_all_ok,
-            "barman_pg_version": status_values["PostgreSQL version"],
-            "barman_available_backups": status_values["No. of available backups"],
-            "barman_time_since_last_backup_seconds": since_last_backup,
-            "barman_time_since_last_backup_minutes":
-                since_last_backup / 60 if since_last_backup is not None else None,
-            "barman_time_since_last_backup_hours":
-                since_last_backup / 3600 if since_last_backup is not None else None,
-            "barman_time_since_last_backup_days":
-                since_last_backup / (3600 * 24) if since_last_backup is not None else None
-        }
-    except:
-        return {
-            "barman_responding": False
-        }
+    return {
+        "barman_running": True,
+        "barman_ok": status_values["Active"] == "True" and check_all_ok,
+        "barman_pg_version": status_values["PostgreSQL version"],
+        "barman_available_backups": status_values["No. of available backups"],
+        "barman_time_since_last_backup_seconds": since_last_backup,
+        "barman_time_since_last_backup_minutes":
+            since_last_backup / 60 if since_last_backup is not None else None,
+        "barman_time_since_last_backup_hours":
+            since_last_backup / 3600 if since_last_backup is not None else None,
+        "barman_time_since_last_backup_days":
+            since_last_backup / (3600 * 24) if since_last_backup is not None else None
+    }
 
 
 @app.route('/metrics')
 def metrics():
-    status = run(["barman", "status", DATABASE_NAME],
-                 stdout=PIPE, universal_newlines=True)
-    check = run(["barman", "check", DATABASE_NAME],
-                 stdout=PIPE, universal_newlines=True)
-    ms = parse_status(status.stdout, check.stdout)
-    ms = label_metrics(ms, {"database": DATABASE_NAME})
-    return render_metrics(ms)
+    try:
+        status = run(["barman", "status", DATABASE_NAME],
+                     stdout=PIPE, universal_newlines=True)
+        check = run(["barman", "check", DATABASE_NAME],
+                     stdout=PIPE, universal_newlines=True)
+        ms = parse_status(status.stdout, check.stdout)
+        ms = label_metrics(ms, {"database": DATABASE_NAME})
+        return render_metrics(ms)
+    except:
+        return {
+            "barman_responding": False
+        }
