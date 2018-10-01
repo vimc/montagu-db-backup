@@ -76,6 +76,6 @@ def metrics():
         ms = label_metrics(ms, {"database": DATABASE_NAME})
         return render_metrics(ms)
     except:
-        return {
+        return render_metrics({
             "barman_responding": False
-        }
+        })
