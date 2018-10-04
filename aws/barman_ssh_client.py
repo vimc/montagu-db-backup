@@ -51,7 +51,11 @@ class BarmanSSHClient(object):
             self._add_known_host(self.vault.target_host_key)
             self._upload_private_key(scp)
             self._upload_db_passwords(scp)
+            scp.put("bin/run-machine-metrics.sh")
             scp.put("bin/run-barman.sh")
+
+        print("Installing machine metrics service...")
+        self._run_long_remote_cmd("./run-machine-metrics.sh")
 
         print("Running barman...")
         self._run_long_remote_cmd("./run-barman.sh")
