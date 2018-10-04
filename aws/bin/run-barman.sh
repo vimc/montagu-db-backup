@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -ex
-
 db_host="montagu.vaccineimpact.org"
 user_and_host="aws@$db_host"
 
