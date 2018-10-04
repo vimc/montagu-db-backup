@@ -35,7 +35,7 @@ general.
 3. Restart stopped container: `docker start barman-montagu`
 4. Restart autossh:
    ```
-   autossh -M 20000 -nNT -f -p 10022 -L 5432:$db_host:5432 aws@montagu.vaccineimpact.org
+   autossh -M 20000 -nNT -f -p 10022 -L 5432:montagu.vaccineimpact.org:5432 aws@montagu.vaccineimpact.org
    ```
 5. Restart the cron job:
    ```

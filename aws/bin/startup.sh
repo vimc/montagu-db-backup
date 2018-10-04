@@ -3,7 +3,7 @@ EBS=/dev/xvdf
 
 set -ex
 apt-get update
-apt-get install -y python3-pip autossh
+apt-get install -y python3-pip autossh postgresql-client
 
 usermod -aG docker ubuntu
 
