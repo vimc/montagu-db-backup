@@ -8,8 +8,11 @@ from flask import Flask
 
 from .montagu_metrics.metrics import label_metrics, render_metrics
 
-DATABASE_NAME = "test" #os.environ['BARMAN_DATABASE_NAME']
 app = Flask(__name__)
+
+
+def get_db_name():
+    return os.environ['BARMAN_DATABASE_NAME']
 
 
 def seconds_elapsed_since(timestamp):
@@ -68,12 +71,13 @@ def parse_status(status, check):
 @app.route('/metrics')
 def metrics():
     try:
-        status = run(["barman", "status", DATABASE_NAME],
+        db_name = get_db_name()
+        status = run(["barman", "status", db_name],
                      stdout=PIPE, universal_newlines=True)
-        check = run(["barman", "check", DATABASE_NAME],
+        check = run(["barman", "check", db_name],
                      stdout=PIPE, universal_newlines=True)
         ms = parse_status(status.stdout, check.stdout)
-        ms = label_metrics(ms, {"database": DATABASE_NAME})
+        ms = label_metrics(ms, {"database": db_name})
         return render_metrics(ms)
     except:
         return render_metrics({

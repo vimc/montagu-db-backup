@@ -39,8 +39,8 @@ fake_barman_check = """
 """
 
 
-def test_endpoint_handles_arbitrary_error():
-
+def test_endpoint_handles_arbitrary_error(monkeypatch):
+    monkeypatch.setenv('BARMAN_DATABASE_NAME', 'test')
     # the call to barman status and barman check will fail in this testing context
     # causing an error
     response = metrics()
