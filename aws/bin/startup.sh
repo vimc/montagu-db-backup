@@ -13,7 +13,7 @@ apt-get install -y python3-pip autossh
 # We don't actually need this, but it makes it easier to test if
 # the port forwarding is working; you can just run:
 # `psql -U vimc -d montagu` and see if you get anything
-apt get install -y postgresql-client
+apt-get install -y postgresql-client
 
 # Enable normal user to perform docker commands
 usermod -aG docker ubuntu
