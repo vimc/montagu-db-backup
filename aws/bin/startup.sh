@@ -39,6 +39,6 @@ echo $fstab_line | sudo tee --append /etc/fstab
 # Install machine metrics
 git clone https://github.com/vimc/machine-metrics.git
 cd machine-metrics
-HOME=/root ./install.sh
+HOME=/root PATH="$PATH:/snap/bin" ./install.sh
 
 echo "ready" > /home/ubuntu/go_signal
