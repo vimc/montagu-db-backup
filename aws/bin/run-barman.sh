@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 set -ex
+
+# Install machine metrics
+git clone https://github.com/vimc/machine-metrics.git
+cd machine-metrics
+sudo -H ./install.sh
+
+# Install barman
 db_host="montagu.vaccineimpact.org"
 user_and_host="aws@$db_host"
 

@@ -36,9 +36,4 @@ swapon /var/swap.1
 fstab_line="/var/swap.1   swap    swap    defaults        0   0"
 echo $fstab_line | sudo tee --append /etc/fstab
 
-# Install machine metrics
-git clone https://github.com/vimc/machine-metrics.git
-cd machine-metrics
-HOME=/root ./install.sh
-
 echo "ready" > /home/ubuntu/go_signal
