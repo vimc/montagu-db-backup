@@ -6,6 +6,11 @@ else
 	apt-get install awscli
 fi
 
+# required to install python sodium bindings (pynacl), which is a dependency
+# of paramiko
+# https://stackoverflow.com/a/36057779
+apt-get install build-essential libssl-dev libffi-dev
+
 pip3 install -r requirements.txt
 
 echo "----------------------"
