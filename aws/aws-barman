@@ -46,6 +46,9 @@ def status():
         print("Instance status: " + instance.status)
         print("Instance ID: " + instance.id)
         print("Instance DNS: " + instance.public_dns_name)
+        print("Metrics: ")
+        print("  barman:  http://{dns}:5000/metrics")
+        print("  machine: http://{dns}:9100/metrics")
 
 
 if __name__ == '__main__':
