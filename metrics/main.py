@@ -6,9 +6,9 @@ from subprocess import PIPE, run
 from dateutil import parser
 from flask import Flask
 
-from montagu_metrics.metrics import label_metrics, render_metrics
+from .montagu_metrics.metrics import label_metrics, render_metrics
 
-DATABASE_NAME = os.environ['BARMAN_DATABASE_NAME']
+DATABASE_NAME = "test" #os.environ['BARMAN_DATABASE_NAME']
 app = Flask(__name__)
 
 
