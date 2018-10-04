@@ -2,9 +2,15 @@
 EBS=/dev/xvdf
 
 set -ex
+
+# Disable services that come with the image that we don't need
+sudo systemctl disable kubelet
+
+# Install required packages
 apt-get update
 apt-get install -y python3-pip autossh postgresql-client
 
+# Enable normal user to perform docker commands
 usermod -aG docker ubuntu
 
 # Format and mount large EBS volume
@@ -22,7 +28,6 @@ dd if=/dev/zero of=/var/swap.1 bs=1M count=2048
 mkswap /var/swap.1
 chmod 600 /var/swap.1
 swapon /var/swap.1
-
 fstab_line="/var/swap.1   swap    swap    defaults        0   0"
 echo $fstab_line | sudo tee --append /etc/fstab
 
