@@ -21,6 +21,8 @@ pip3 install -r requirements.txt
 # -nNT  - Don't read, do anything remotely, or allocate a remote terminal
 # -p    - Connect to SSH server on 10022, as production has a non-standard port
 # -L    - Sets up tunnel from local port to remote host & port
+echo AUTOSSH_LOGFILE="$HOME/autossh.log" >> ~/.profile
+source ~/.profile
 autossh -M 20000 \
     -nNT \
     -f \
