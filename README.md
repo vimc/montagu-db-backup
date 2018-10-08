@@ -105,11 +105,13 @@ differ by database.
 ### Tests
 To test the metrics Flask app, run
 ```
-sudo -H install ./metrics/bin/requirements.txt ./metrics/bin/requirements-dev.txt
+cd ./backup/metrics
+sudo -H  pip3 install -r ./bin/requirements.txt
+sudo -H  pip3 install -r ./bin/requirements-dev.txt
 pytest
 ```
 
-On Teamcity we run these tests inside a docker container using `./metrics/scripts/teamcity.sh`
+On Teamcity we run these tests inside a docker container using `./backup/metrics/scripts/teamcity.sh`
 
 ## Interacting with barman
 To see a set of status information run
