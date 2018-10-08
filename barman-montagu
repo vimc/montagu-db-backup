@@ -127,7 +127,7 @@ def setup(host, slot, password_group, tag, registry, pull, clean_on_error,
         'BARMAN_{}_PASS_BACKUP'.format(db): pw['barman'],
         'BARMAN_{}_PASS_STREAM'.format(db): pw['streaming_barman'],
         'BARMAN_{}_SLOT_NAME'.format(db): slot,
-        # This value is used by the Flask metrics app (in ./barman_metrics)
+        # This value is used by the Flask metrics app (in ./metrics)
         'BARMAN_DATABASE_NAME': DATABASE_NAME
     }
     extra_hosts = {'db': resolve_host_ip(host)}
