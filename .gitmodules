@@ -1,5 +1,5 @@
-[submodule "metrics/montagu_metrics"]
-	path = metrics/montagu_metrics
+[submodule "metrics/bin/montagu_metrics"]
+	path = metrics/bin/montagu_metrics
 	url = https://github.com/vimc/montagu-metrics-py
 [submodule "aws/vault"]
 	path = aws/vault

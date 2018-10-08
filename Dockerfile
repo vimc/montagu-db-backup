@@ -30,9 +30,9 @@ COPY etc /etc
 COPY bin /usr/local/bin
 
 WORKDIR /app
-COPY metrics/requirements.txt .
+COPY metrics/bin/requirements.txt .
 RUN pip3 install -r requirements.txt
-COPY metrics/montagu_metrics/requirements.txt montagu_metrics/requirements.txt
+COPY metrics/bin/montagu_metrics/requirements.txt montagu_metrics/requirements.txt
 RUN pip3 install -r montagu_metrics/requirements.txt
 
 COPY metrics /app
