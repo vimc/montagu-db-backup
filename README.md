@@ -102,6 +102,15 @@ tracking the same db (as we do: production and AWS) they will differ by
 instance_name. And if they are tracking different databases they will also
 differ by database.
 
+### Tests
+To test the metrics Flask app, run
+```
+sudo -H install ./barman_metrics/bin/requirements.txt ./barman_metrics/bin/requirements-dev.txt
+pytest
+```
+
+On Teamcity we run these tests inside a docker container using `barman_metrics/scripts/teamcity.sh`
+
 ## Interacting with barman
 To see a set of status information run
 
