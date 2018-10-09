@@ -102,6 +102,17 @@ tracking the same db (as we do: production and AWS) they will differ by
 instance_name. And if they are tracking different databases they will also
 differ by database.
 
+### Tests
+To test the metrics Flask app, run
+```
+cd ./backup/metrics
+sudo -H  pip3 install -r ./bin/requirements.txt
+sudo -H  pip3 install -r ./bin/requirements-dev.txt
+pytest
+```
+
+On Teamcity we run these tests inside a docker container using `./backup/metrics/scripts/teamcity.sh`
+
 ## Interacting with barman
 To see a set of status information run
 
