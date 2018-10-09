@@ -31,5 +31,4 @@ COPY etc /etc
 COPY bin /usr/local/bin
 COPY schedule.yml /schedule.yml
 
-ENTRYPOINT ["yacron"]
-CMD ["-c", "/schedule.yml"]
+ENTRYPOINT ["barman-entrypoint"]
