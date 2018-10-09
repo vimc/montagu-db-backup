@@ -32,7 +32,6 @@ def verify(conf, no_initial_backup):
         test_connections(x)
     if not no_initial_backup:
         initial_backup(conf)
-    setup_cron(conf)
 
 
 def write_pgpass(dat):
@@ -114,16 +113,6 @@ def initial_backup(conf):
         subprocess.run(["barman", "backup", nm], check=True)
         print("Checking barman status of {}".format(nm), flush=True)
         subprocess.run(["barman", "check", nm], check=True)
-
-
-def setup_cron(conf):
-    print("Setting up cron jobs", flush=True)
-    # Once-per-minute cron job:
-    cron = "* * * * * root barman cron\n"
-    with open("/etc/cron.d/barman", 'w') as f:
-        f.write(cron)
-    print("Starting cron service", flush=True)
-    subprocess.run(["service", "cron", "start"], check=True)
 
 
 # This seems a bit flakey to archive but usually runs just fine the

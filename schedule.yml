@@ -1,0 +1,7 @@
+jobs:
+  - name: barman-cron
+    command: barman cron
+    schedule: "* * * * *"
+  - name: metrics
+    command: echo "would save metrics here"
+    schedule: "*/5 * * * *"
