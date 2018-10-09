@@ -10,7 +10,7 @@ mkdir -p $METRICS_PATH
 rm -f ${METRICS_PATH}/check.txt ${METRICS_PATH}/status.txt
 
 # Extra check to ensure we're not dealing with stale metrics
-if [ -f ${METRICS_PATH}/check.txt || -f ${METRICS_PATH}/status.txt ];
+if [[ -f ${METRICS_PATH}/check.txt || -f ${METRICS_PATH}/status.txt ]]; then
    echo "Failed to delete stale metrics files"
    exit 1
 fi

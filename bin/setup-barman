@@ -136,3 +136,5 @@ if __name__ == "__main__":
     print("Arguments: {}".format(args))
     if not args["--no-verify"]:
         verify(conf, args["--no-initial-backup"])
+    with open("/var/lib/barman/go_signal", "w") as f:
+        f.write("")

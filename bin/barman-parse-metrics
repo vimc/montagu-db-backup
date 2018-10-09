@@ -1,9 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Usage:
   barman-parse-metrics <path>
 """
 
 import docopt
+import json
 import os
 import re
 import tempfile
@@ -78,6 +79,7 @@ def save_metrics(data, path):
     with tempfile.NamedTemporaryFile(mode='w', dir=path, delete=False) as f:
         f.write(json.dumps(ret))
     os.replace(f.name, dest)
+    os.remove(f.name)
 
 
 def barman_output_as_dict(text):
@@ -97,8 +99,9 @@ def read_lines(filename):
 
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
+    path = args['<path>']
     try:
-        dat = barman_parse_metrics(args['<path>'])
+        dat = parse_status(path)
     except:
-        dat = {barman_running: False}
+        dat = {"barman_running": False}
     save_metrics(dat, path)
