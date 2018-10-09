@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# NOTE: not run with '-e' because we need to continue even if the
+# check/status commands fail.
+
+METRICS_PATH=/metrics
+
+mkdir -p $METRICS_PATH
+# First delete all files so that we can't accidently read in stale data
+rm -f ${METRICS_PATH}/check.txt ${METRICS_PATH}/status.txt
+
+# Extra check to ensure we're not dealing with stale metrics
+if [ -f ${METRICS_PATH}/check.txt || -f ${METRICS_PATH}/status.txt ];
+   echo "Failed to delete stale metrics files"
+   exit 1
+fi
+
+# Generate out the new diagnostics
+barman check $BARMAN_DATABASE_NAME > ${METRICS_PATH}/check.txt
+barman status $BARMAN_DATABASE_NAME > ${METRICS_PATH}/status.txt
+
+# Put this into the format expected by the cache monitor
+barman-parse-metrics ${METRICS_PATH}
