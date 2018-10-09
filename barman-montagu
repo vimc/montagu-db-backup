@@ -45,6 +45,7 @@ BARMAN_CONTAINER = 'barman-montagu'
 BARMAN_VOLUMES = {
     'data': {'volume': 'barman_data', 'path': '/var/lib/barman'},
     'logs': {'volume': 'barman_logs', 'path': '/var/log/barman'},
+    'metrics': {'volume': 'barman_metrics', 'path': '/metrics'},
     'recover': {'volume': 'barman_recover', 'path': '/recover'},
     'nightly': {'volume': 'montagu_db_volume', 'path': '/nightly'}
 }

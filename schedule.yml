@@ -3,7 +3,7 @@ jobs:
     command: barman cron
     schedule: "* * * * *"
   - name: metrics
-    command: echo "would save metrics here"
+    command: barman-save-metrics
     schedule: "*/5 * * * *"
   # this would be a good way of doing startup but we're stuck with
   # https://github.com/gjcarneiro/yacron/issues/22
