@@ -6,7 +6,6 @@ FROM ubuntu:16.04
 RUN apt-get update && \
         apt-get install -y --no-install-recommends \
                 cron \
-                python-flask \
                 python3-pip \
                 python3-setuptools \
                 wget
@@ -29,15 +28,4 @@ VOLUME /nightly
 COPY etc /etc
 COPY bin /usr/local/bin
 
-WORKDIR /app
-COPY metrics/bin/requirements.txt .
-RUN pip3 install -r requirements.txt
-COPY metrics/bin/montagu_metrics/requirements.txt montagu_metrics/requirements.txt
-RUN pip3 install -r montagu_metrics/requirements.txt
-
-COPY metrics /app
-ENV FLASK_APP=main.py
-ENV LC_ALL=C.UTF-8
-ENV LANG=C.UTF-8
-
-ENTRYPOINT ["flask", "run", "--host=0.0.0.0"]
+ENTRYPOINT ["idle"]
