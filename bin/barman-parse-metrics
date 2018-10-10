@@ -61,10 +61,10 @@ def parse_status(path):
     ret = {clean_key(k, "barman_check_"): int(v.startswith("OK"))
            for (k, v) in check.items()}
     ret["barman_ok"] = all(x == 1 for x in ret.values())
-    ret["barman_running"] = True
+    ret["barman_running"] = 1
     ret["barman_data_size"] = parse_size(status["Current data size"])
     ret["barman_pg_version"] = status["PostgreSQL version"]
-    ret["barman_available_backups"] = status["No. of available backups"]
+    ret["barman_available_backups"] = int(status["No. of available backups"])
     ret.update(parse_last_backup_age(status["Last available backup"]))
     return ret
 
@@ -102,5 +102,5 @@ if __name__ == "__main__":
     try:
         dat = parse_status(path)
     except:
-        dat = {"barman_running": False}
+        dat = {"barman_running": 0}
     save_metrics(dat, path)
