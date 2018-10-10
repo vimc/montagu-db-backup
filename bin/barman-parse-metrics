@@ -79,7 +79,6 @@ def save_metrics(data, path):
     with tempfile.NamedTemporaryFile(mode='w', dir=path, delete=False) as f:
         f.write(json.dumps(ret))
     os.replace(f.name, dest)
-    os.remove(f.name)
 
 
 def barman_output_as_dict(text):
