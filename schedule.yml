@@ -5,9 +5,3 @@ jobs:
   - name: metrics
     command: barman-save-metrics
     schedule: "*/5 * * * *"
-  # this would be a good way of doing startup but we're stuck with
-  # https://github.com/gjcarneiro/yacron/issues/22
-  #
-  # - name: startup
-  #   command: echo "on startup"
-  #   schedule: "@reboot"
