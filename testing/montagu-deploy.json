@@ -5,7 +5,7 @@
     "notify_channel": "",
     "db_annex_type": "fake",
     "open_browser": false,
-    "port": "8443",
+    "port": "11443",
     "backup": false,
     "hostname": "localhost",
     "certificate": "self_signed",
@@ -16,5 +16,6 @@
     "add_test_user": false,
     "enable_db_replication": true,
     "password_group": "production",
+    "update_on_deploy": false,
     "bb8_backup": false
 }
