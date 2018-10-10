@@ -109,12 +109,12 @@ def initial_backup(conf):
         base_dir = '/var/lib/barman/{}/base'.format(nm)
         if os.path.exists(base_dir) and os.listdir(base_dir):
             print("Base backup already exists for {}".format(nm))
-            next
-        force_archive(nm)
-        print("Running initial backup of {}".format(nm), flush=True)
-        subprocess.run(["barman", "backup", nm], check=True)
-        print("Checking barman status of {}".format(nm), flush=True)
-        subprocess.run(["barman", "check", nm], check=True)
+        else:
+            force_archive(nm)
+            print("Running initial backup of {}".format(nm), flush=True)
+            subprocess.run(["barman", "backup", nm], check=True)
+            print("Checking barman status of {}".format(nm), flush=True)
+            subprocess.run(["barman", "check", nm], check=True)
 
 
 # This seems a bit flakey to archive but usually runs just fine the
