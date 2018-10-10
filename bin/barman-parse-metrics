@@ -71,9 +71,9 @@ def parse_status(path):
 
 def save_metrics(data, path):
     now = datetime.now(timezone.utc)
-    utc_secs = now.timestamp()
+    utc_seconds = now.timestamp()
     utc_string = now.isoformat()
-    ret = {"utc_secs": utc_secs, "utc_string": utc_string, "data": data}
+    ret = {"utc_seconds": utc_seconds, "utc_string": utc_string, "data": data}
     dest = path + "/metrics.json"
     # Atomic write
     with tempfile.NamedTemporaryFile(mode='w', dir=path, delete=False) as f:
