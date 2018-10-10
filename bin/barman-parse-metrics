@@ -30,7 +30,7 @@ def seconds_elapsed_since(timestamp):
 
 
 def clean_key(k, prefix):
-    return prefix + re.sub("[^A-Za-z0-9]", "_", k)
+    return prefix + re.sub("[^A-Za-z0-9]+", "_", k)
 
 
 def parse_size(s):
