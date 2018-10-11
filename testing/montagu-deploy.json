@@ -15,6 +15,6 @@
     "require_clean_git": false,
     "add_test_user": false,
     "enable_db_replication": true,
-    "password_group": "production",
+    "password_group": "fake",
     "bb8_backup": false
 }
