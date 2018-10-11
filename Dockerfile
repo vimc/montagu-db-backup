@@ -22,8 +22,9 @@ RUN pip3 install \
         docopt \
         yacron
 
+ENV METRICS_UTILS_REF 4b2ef9b
 RUN git clone https://github.com/vimc/montagu-metrics-py /tmp/metrics_utils && \
-        git -C /tmp/metrics_utils reset --hard 4b2ef9b && \
+        git -C /tmp/metrics_utils reset --hard $METRICS_UTILS_REF && \
         pip3 install -r /tmp/metrics_utils/requirements.txt && \
         rm -rf /tmp/metrics_utils/.git && \
         mv /tmp/metrics_utils /usr/local/lib/python3.5/dist-packages
