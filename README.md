@@ -74,7 +74,7 @@ docker build --tag montagu-barman:test .
     --slot=barman \
     --image-source= \
     --image-tag=test \
-    --password-group=fake \
+    --password-group=production \
     localhost
 ```
 
