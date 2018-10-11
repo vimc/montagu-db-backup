@@ -46,10 +46,13 @@ def parse_status(path):
     status = barman_output_as_dict(read_lines(path + '/status.txt'))
     ret = {clean_key(k, "barman_check_"): int(v.startswith("OK"))
            for (k, v) in check.items()}
-    ret["barman_ok"] = all(x == 1 for x in ret.values())
+    ret["barman_ok"] = int(all(x == 1 for x in ret.values()))
     ret["barman_running"] = 1
+    ret["barman_metrics_ok"] = 1
     ret["barman_data_size"] = parse_size(status["Current data size"])
-    ret["barman_pg_version"] = status["PostgreSQL version"]
+    pg_version = status["PostgreSQL version"].split(".")
+    ret["pg_version_major"] = int(pg_version[0])
+    ret["pg_version_minor"] = int(pg_version[1])
     ret["barman_available_backups"] = int(status["No. of available backups"])
     ret.update(parse_last_backup_age(status["Last available backup"]))
     return ret
@@ -87,6 +90,14 @@ if __name__ == "__main__":
     path = args['<path>']
     try:
         dat = parse_status(path)
-    except:
-        dat = {"barman_running": 0}
+    except Exception as e:
+        # This is an expected failure mode - if the files are not
+        # present then one of the barman commands failed to run and
+        # barman is no longer reporting things properly.
+        barman_running = type(e) != FileNotFoundError
+        dat = {"barman_metrics_ok": 1,
+               "barman_running": barman_running,
+               "barman_ok": 0}
+        print("Error while parsing barman status:")
+        print(e)
     save_metrics(dat, path)
