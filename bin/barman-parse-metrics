@@ -12,21 +12,7 @@ import tempfile
 from datetime import datetime, timezone
 from dateutil import parser
 
-
-# These should come from Alex's module code
-def parse_timestamp(raw):
-    if raw and raw != "None":
-        return parser.parse(raw)
-    else:
-        return None
-
-
-def seconds_elapsed_since(timestamp):
-    if timestamp:
-        now = datetime.now()
-        return (now - timestamp).total_seconds()
-    else:
-        return None
+from metrics_utils.metrics import parse_timestamp, seconds_elapsed_since
 
 
 def clean_key(k, prefix):
@@ -42,7 +28,7 @@ def parse_size(s):
 def parse_last_backup_age(s):
     last_available = parse_timestamp(s)
     if last_available:
-        since_last_backup = seconds_elapsed_since(last_available)
+        since_last_backup = seconds_elapsed_since(last_available.timestamp())
         return {
             "barman_time_of_last_backup": last_available.timestamp(),
             "barman_time_since_last_backup_seconds": since_last_backup,
