@@ -1,4 +1,4 @@
-from bin.main import parse_status, metrics
+from app.main import parse_status, metrics
 
 fake_barman_status = """
     Active: True
