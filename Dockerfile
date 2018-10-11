@@ -5,13 +5,10 @@ FROM ubuntu:16.04
 # key from the postgres deb repo
 RUN apt-get update && \
         apt-get install -y --no-install-recommends \
+                git \
                 python3-pip \
                 python3-setuptools \
                 wget
-
-RUN pip3 install \
-        docopt \
-        yacron
 
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
         apt-key add - && \
@@ -20,6 +17,16 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
         apt-get install -y \
                 barman \
                 postgresql-client-10
+
+RUN pip3 install \
+        docopt \
+        yacron
+
+RUN git clone https://github.com/vimc/montagu-metrics-py /tmp/metrics_utils && \
+        git -C /tmp/metrics_utils reset --hard 4b2ef9b && \
+        pip3 install -r /tmp/metrics_utils/requirements.txt && \
+        rm -rf /tmp/metrics_utils/.git && \
+        mv /tmp/metrics_utils /usr/local/lib/python3.5/dist-packages
 
 VOLUME /var/lib/barman
 VOLUME /var/log/barman
