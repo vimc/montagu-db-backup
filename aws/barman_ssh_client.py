@@ -54,11 +54,11 @@ class BarmanSSHClient(object):
             scp.put("bin/run-machine-metrics.sh")
             scp.put("bin/run-barman.sh")
 
-        print("Installing machine metrics service...")
-        self._run_long_remote_cmd("./run-machine-metrics.sh")
-
         print("Running barman...")
         self._run_long_remote_cmd("./run-barman.sh")
+
+        print("Installing machine metrics service...")
+        self._run_long_remote_cmd("./run-machine-metrics.sh")
 
     def _add_known_host(self, public_key):
         self._run_remote_cmd('echo "{}" >> .ssh/known_hosts '.format(

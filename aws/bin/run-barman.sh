@@ -9,7 +9,7 @@ mkdir barman && cd barman
 git clone --recursive https://github.com/vimc/montagu-db
 cd montagu-db/backup
 git checkout i2260  # Return to master
-git submodule init && gitsubmodule update
+git submodule init && git submodule update
 pip3 install -r requirements.txt
 
 # http://www.harding.motd.ca/autossh/README.txt
