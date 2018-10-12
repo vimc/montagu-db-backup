@@ -1,2 +1,0 @@
-pytest>=3.5.1
-teamcity-messages>=1.21
