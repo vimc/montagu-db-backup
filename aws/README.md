@@ -39,7 +39,7 @@ general.
    ```
 5. Restart the cron job:
    ```
-   docker exec barman-montagu setup-barman --no-initial-backup
+   docker exec barman-montagu setup-barman
    ```
 
 

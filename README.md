@@ -205,7 +205,7 @@ We want to deploy a new version of barman to run, but keep all the data intact. 
 * Update the repo as required
 * `docker stop barman-montagu`
 * `docker rm barman-montagu`
-* `./barman-montagu setup --pull-image --slot barman --no-initial-backup production.montagu.dide.ic.ac.uk`
+* `./barman-montagu setup --pull-image --slot barman production.montagu.dide.ic.ac.uk`
 
 ## Development notes
 
