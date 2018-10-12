@@ -8,7 +8,7 @@ source ./db_passwords && rm ./db_passwords
 mkdir barman && cd barman
 git clone --recursive https://github.com/vimc/montagu-db
 cd montagu-db/backup
-git checkout i2260  # Return to master
+git checkout master
 git submodule init && git submodule update
 pip3 install -r requirements.txt
 
