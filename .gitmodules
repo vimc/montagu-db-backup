@@ -5,3 +5,6 @@
 [submodule "metrics/app/montagu_metrics"]
 	path = metrics/app/montagu_metrics
 	url = https://github.com/vimc/montagu-metrics-py.git
+[submodule "cached-metrics"]
+	path = cached-metrics
+	url = https://github.com/vimc/cached-metrics
