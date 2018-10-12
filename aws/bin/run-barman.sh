@@ -6,9 +6,10 @@ user_and_host="aws@$db_host"
 source ./db_passwords && rm ./db_passwords
 
 mkdir barman && cd barman
-git clone https://github.com/vimc/montagu-db
+git clone --recursive https://github.com/vimc/montagu-db
 cd montagu-db/backup
-git checkout master
+git checkout i2260  # Return to master
+git submodule init && gitsubmodule update
 pip3 install -r requirements.txt
 
 # http://www.harding.motd.ca/autossh/README.txt

@@ -58,6 +58,7 @@ To set up barman:
 
 ```
 barman-montagu setup --pull-image --slot barman production.montagu.dide.ic.ac.uk
+./start-metrics.sh       # Exposes Prometheus metrics on port 5000
 ```
 
 Or, for local testing you would want:
