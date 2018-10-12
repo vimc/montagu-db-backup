@@ -31,11 +31,14 @@ autossh -M 20000 \
     -L 5432:$db_host:5432 \
     $user_and_host
 
+# The metrics won't get any data until barman is up and running, but they will
+# still work
+./start-metrics.sh
+
 # -u makes Python not buffer stdout, so we can monitor remotely
 # localhost is forwarded by SSH to the true host
 # For unknown reasons, this line refuses to break over multiple lines
 python3 -u ./barman-montagu setup --pull-image --image-source=vimc --no-clean-on-error --slot=barman_aws --volume_data=/mnt/data/barman_data --volume_logs=/mnt/data/barman_logs --volume_recover=/mnt/data/barman_recover localhost
-./start-metrics.sh
 
 echo "------------------------------------------------------"
 echo "you maybe want to run a base backup now"
