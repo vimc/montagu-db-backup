@@ -14,4 +14,4 @@ cat <<EOF > config.json
 }
 EOF
 
-./cached-metrics/scripts/run
+./cached-metrics/scripts/run --public
