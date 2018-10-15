@@ -5,6 +5,7 @@ set -ex
 
 # Disable services that come with the image that we don't need
 sudo systemctl disable kubelet
+sudo systemctl stop kubelet
 
 # Install required packages
 apt-get update
