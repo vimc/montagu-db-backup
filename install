@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 HERE=$(realpath $(dirname $0))
-NAME=barman-montagu
+NAME=barman-wrapper
 DEST=/usr/local/bin/$NAME
 SRC=$HERE/$NAME
 

@@ -21,24 +21,24 @@ Then install the command with
 sudo ./install
 ```
 
-which sets up a `barman-montagu` command that can be used from anywhere on the
+which sets up a `barman-wrapper` command that can be used from anywhere on the
 computer that refers to the configuration in *this* directory (you can also use
-`./barman-montagu` and avoid installing).
+`./barman-wrapper` and avoid installing).
 
-Then you can interact with the barman container the `barman-montagu` command:
+Then you can interact with the barman container the `barman-wrapper` command:
 
 ```
-$ barman-montagu --help
+$ barman-wrapper --help
 Set up and use barman (Postgres streaming backup) for montagu
 
 Usage:
-  barman-montagu setup [options] --slot=<slot> <host>
-  barman-montagu status
-  barman-montagu barman [--] [<args>...]
-  barman-montagu recover [--wipe-first] [<backup-id>]
-  barman-montagu update-nightly
-  barman-montagu wipe-recover
-  barman-montagu destroy
+  barman-wrapper setup [options] --slot=<slot> <host>
+  barman-wrapper status
+  barman-wrapper barman [--] [<args>...]
+  barman-wrapper recover [--wipe-first] [<backup-id>]
+  barman-wrapper update-nightly
+  barman-wrapper wipe-recover
+  barman-wrapper destroy
 
 Options:
   --password-group=<group>  Password group [default: production]
@@ -52,26 +52,26 @@ Options:
 ```
 
 These commands create and pass through to the `barman` process in a long running
-container that is called `barman-montagu`
+container that is called `barman-wrapper`
 
 To set up barman:
 
 ```
-barman-montagu setup --pull-image --slot barman production.montagu.dide.ic.ac.uk
+barman-wrapper setup --pull-image --slot barman production.montagu.dide.ic.ac.uk
 ./start-metrics.sh       # Exposes Prometheus metrics on port 5000
 ```
 
 Or, for local testing you would want:
 
 ```
-barman-montagu setup --pull-image --slot barman localhost
+barman-wrapper setup --pull-image --slot barman localhost
 ```
 
 Or, for testing a locally built barman image, something like:
 
 ```
 docker build --tag montagu-barman:test .
-./barman-montagu setup \
+./barman-wrapper setup \
     --slot=barman \
     --image-source= \
     --image-tag=test \
@@ -118,28 +118,28 @@ On Teamcity we run these tests inside a docker container using `./backup/metrics
 To see a set of status information run
 
 ```
-barman-montagu status
+barman-wrapper status
 ```
 
-To interact with barman directly, either do `docker exec barman-montagu barman ...` or use
+To interact with barman directly, either do `docker exec barman-wrapper barman ...` or use
 
 ```
 
-barman-montagu barman -- --help
+barman-wrapper barman -- --help
 ```
 
-(the `--` is often optional but disambiguates arguments to `barman-montagu` and
+(the `--` is often optional but disambiguates arguments to `barman-wrapper` and
 for barman).  For example listing files in the most recent backup might look
 like:
 
 ```
-barman-montagu barman list-files montagu latest
+barman-wrapper barman list-files montagu latest
 ```
 
 or getting information about the latest backup:
 
 ```
-barman-montagu barman show-backup montagu latest
+barman-wrapper barman show-backup montagu latest
 ```
 
 (see [the `barman` docs](http://docs.pgbarman.org/release/2.0) for more commands).
@@ -147,7 +147,7 @@ barman-montagu barman show-backup montagu latest
 To dump out the latest copy of the database to recover from:
 
 ```
-barman-montagu recover --wipe-first
+barman-wrapper recover --wipe-first
 ```
 
 You will then need to clone the contents of the `barman_recover` volume into a
@@ -157,21 +157,21 @@ Every night a snapshot of the database can be written out to the
 `montagu_db_volume` volume, by running
 
 ```
-barman-montagu update-nightly
+barman-wrapper update-nightly
 ```
 
 This should be arranged to run on your host machine.
 
-For a manual dump, prefer the `barman-montagu recover` which writes to the
+For a manual dump, prefer the `barman-wrapper recover` which writes to the
 `barman_recover` volume.
 
 To remove all traces of barman (the container and the volumes), use:
 
 ```
-barman-montagu destroy
+barman-wrapper destroy
 ```
 
-The `barman-montagu` script does not depend on its location and can be moved to
+The `barman-wrapper` script does not depend on its location and can be moved to
 a position within `$PATH`.
 
 ## About the connections
@@ -204,9 +204,9 @@ We want to deploy a new version of barman to run, but keep all the data intact. 
 
 * Log in to `annex.montagu` and go to `montagu-db-backup/backup`
 * Update the repo as required
-* `docker stop barman-montagu`
-* `docker rm barman-montagu`
-* `./barman-montagu setup --pull-image --slot barman production.montagu.dide.ic.ac.uk`
+* `docker stop barman-wrapper`
+* `docker rm barman-wrapper`
+* `./barman-wrapper setup --pull-image --slot barman production.montagu.dide.ic.ac.uk`
 
 ## Development notes
 
@@ -290,7 +290,7 @@ creates a minimal montagu deployment that supports streaming replication.
 Run:
 
 ```
-barman-montagu setup --pull-image localhost
+barman-wrapper setup --pull-image localhost
 ```
 
 (you may want to specify `--image-tag` too to run the branch you're working on).

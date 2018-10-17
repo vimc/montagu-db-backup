@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -ex
 
-./barman-montagu setup --pull localhost
-./barman-montagu recover
+./barman-wrapper setup --pull localhost
+./barman-wrapper recover
 
 docker run --rm -d \
        --name db_recovered \
@@ -13,4 +13,4 @@ docker logs --tail 10 db_recovered
 docker exec db_recovered psql -U vimc -d montagu -c "\dt"
 docker stop db_recovered
 
-./barman-montagu destroy
+./barman-wrapper destroy

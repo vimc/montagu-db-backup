@@ -16,7 +16,7 @@ To interact directly with barman in the aws machine:
 
 * `./aws-barman ssh`
 * `cd barman/montagu-db/backup`
-* `./barman-montagu status` (etc)
+* `./barman-wrapper status` (etc)
 
 Are the metrics running?
 
@@ -32,14 +32,14 @@ general.
 
 1. Reboot instance using AWS console
 2. SSH in
-3. Restart stopped container: `docker start barman-montagu`
+3. Restart stopped container: `docker start barman-wrapper`
 4. Restart autossh:
    ```
    autossh -M 20000 -nNT -f -p 10022 -L 5432:montagu.vaccineimpact.org:5432 aws@montagu.vaccineimpact.org
    ```
 5. Restart the cron job:
    ```
-   docker exec barman-montagu setup-barman
+   docker exec barman-wrapper setup-barman
    ```
 
 

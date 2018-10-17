@@ -2,13 +2,13 @@
 """Set up and use barman (Postgres streaming backup) for montagu
 
 Usage:
-  barman-montagu setup [options] --slot=<slot> <host>
-  barman-montagu status
-  barman-montagu barman [--] [<args>...]
-  barman-montagu recover [--wipe-first] [<backup-id>]
-  barman-montagu update-nightly
-  barman-montagu wipe-recover
-  barman-montagu destroy
+  barman-wrapper setup [options] --slot=<slot> <host>
+  barman-wrapper status
+  barman-wrapper barman [--] [<args>...]
+  barman-wrapper recover [--wipe-first] [<backup-id>]
+  barman-wrapper update-nightly
+  barman-wrapper wipe-recover
+  barman-wrapper destroy
 
 Options:
   --password-group=<group>  Password group [default: production]
@@ -36,7 +36,7 @@ import hvac
 
 # These defaults are all fairly montagu specific
 DEFAULT_VAULT_ADDR = "https://support.montagu.dide.ic.ac.uk:8200"
-BARMAN_CONTAINER = 'barman-montagu'
+BARMAN_CONTAINER = 'barman-wrapper'
 # The 'volume' element is the name of the volume (so can be adjusted)
 # but the 'path' element corresponds to a path within the container
 # and are assumed by either barman (for data and logs) or us (for
