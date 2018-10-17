@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -ex
 
-git clone https://github.com/vimc/machine-metrics.git
-cd machine-metrics
-sudo -H ./install.sh
+WORKDIR=$(mktemp -d)
+
+function finish {
+    rm -rf $WORKDIR
+}
+trap finish EXIT
+
+git clone https://github.com/vimc/machine-metrics.git $WORKDIR
+(cd "${WORKDIR}" && sudo -H ./install)
