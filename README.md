@@ -10,8 +10,8 @@ takes a long time to rebuild the indices.
 Barman is running on `annex.montagu.dide.ic.ac.uk` as container `montagu-barman`
 
 ```
-git clone https://github.com/vimc/montagu-db montagu-db-backup
-cd montagu-db-backup/backup
+git clone https://github.com/vimc/montagu-db-backup
+cd montagu-db-backup
 pip3 install -r requirements.txt
 ```
 
@@ -202,7 +202,7 @@ The IP address for the aws machine will show up as production (129.31.26.29) and
 
 We want to deploy a new version of barman to run, but keep all the data intact. This is the proceedure
 
-* Log in to `annex.montagu` and go to `montagu-db-backup/backup`
+* Log in to `annex.montagu` and go to `montagu-db-backup`
 * Update the repo as required
 * `docker stop barman-montagu`
 * `docker rm barman-montagu`

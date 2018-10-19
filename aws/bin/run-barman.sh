@@ -6,8 +6,8 @@ user_and_host="aws@$db_host"
 source ./db_passwords && rm ./db_passwords
 
 mkdir barman && cd barman
-git clone --recursive https://github.com/vimc/montagu-db
-cd montagu-db/backup
+git clone --recursive https://github.com/vimc/montagu-db-backup
+cd montagu-db-backup
 git checkout master
 git submodule init && git submodule update
 pip3 install -r requirements.txt
@@ -46,6 +46,6 @@ echo
 echo "to do so"
 echo
 echo "./aws-barman ssh"
-echo "cd barman/montagu-db/backup"
+echo "cd barman/montagu-db-backup"
 echo "screen"
 echo "./barman-montagu barman backup montagu"

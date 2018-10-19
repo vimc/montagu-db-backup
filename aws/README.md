@@ -15,7 +15,7 @@ Note `aws-barman stop` will destroy the existing EC2 instance.
 To interact directly with barman in the aws machine:
 
 * `./aws-barman ssh`
-* `cd barman/montagu-db/backup`
+* `cd barman/montagu-db-backup`
 * `./barman-montagu status` (etc)
 
 Are the metrics running?
