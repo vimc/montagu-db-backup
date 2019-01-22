@@ -1,3 +1,5 @@
+# Use crontab.guru for testing cron expressions, e.g.:
+# https://crontab.guru/#0_0_1_*_*
 jobs:
   - name: barman-cron
     command: barman cron
