@@ -10,8 +10,3 @@ slot_name = $slot_name
 # at present each backup costs a couple of hundred GB so without infinite
 # disk space (and money on AWS) this can't be unbounded
 retention_policy = RECOVERY WINDOW OF 3 MONTHS
-
-# http://docs.pgbarman.org/release/2.5/#backup-features
-# > incremental backup, by reusing the last backup for a server and creating
-# > a hard link of the unchanged files (for backup space and time reduction)
-reuse_backup = link
