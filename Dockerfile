@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 # We need python for our scripts as well as for barman.  It's put
 # first because this also downloads wget which we need to get the gpg
@@ -6,15 +6,20 @@ FROM ubuntu:16.04
 RUN apt-get update && \
         apt-get install -y --no-install-recommends \
                 git \
+                gnupg2 \
                 python3-pip \
                 python3-setuptools \
                 wget
 
+# Setting TZ here is necessary to stop apt interactively prompting for
+# configuration options, followed by the environment variable
+# DEBIAN_FRONTEND=noninteractive before the install itself.
+ENV TZ=Europe/London
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
         apt-key add - && \
-        sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" >> /etc/apt/sources.list.d/postgresql.list' && \
+        sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" >> /etc/apt/sources.list.d/postgresql.list' && \
         apt-get update && \
-        apt-get install -y \
+        DEBIAN_FRONTEND=noninteractive apt-get install -y \
                 barman \
                 postgresql-client-10
 
@@ -27,7 +32,7 @@ RUN git clone https://github.com/vimc/metrics-utils /tmp/metrics_utils && \
         git -C /tmp/metrics_utils reset --hard $METRICS_UTILS_REF && \
         pip3 install -r /tmp/metrics_utils/requirements.txt && \
         rm -rf /tmp/metrics_utils/.git && \
-        mv /tmp/metrics_utils /usr/local/lib/python3.5/dist-packages
+        mv /tmp/metrics_utils /usr/local/lib/python3.6/dist-packages
 
 VOLUME /var/lib/barman
 VOLUME /var/log/barman
