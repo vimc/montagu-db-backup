@@ -32,7 +32,7 @@ RUN git clone https://github.com/vimc/metrics-utils /tmp/metrics_utils && \
         git -C /tmp/metrics_utils reset --hard $METRICS_UTILS_REF && \
         pip3 install -r /tmp/metrics_utils/requirements.txt && \
         rm -rf /tmp/metrics_utils/.git && \
-        mv /tmp/metrics_utils /usr/local/lib/python3.5/dist-packages
+        mv /tmp/metrics_utils /usr/local/lib/python3.6/dist-packages
 
 VOLUME /var/lib/barman
 VOLUME /var/log/barman
