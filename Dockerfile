@@ -6,6 +6,7 @@ FROM ubuntu:18.04
 RUN apt-get update && \
         apt-get install -y --no-install-recommends \
                 git \
+                gnupg2 \
                 python3-pip \
                 python3-setuptools \
                 wget
