@@ -11,11 +11,15 @@ RUN apt-get update && \
                 python3-setuptools \
                 wget
 
+# Setting TZ here is necessary to stop apt interactively prompting for
+# configuration options, followed by the environment variable
+# DEBIAN_FRONTEND=noninteractive before the install itself.
+ENV TZ=Europe/London
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
         apt-key add - && \
-        sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" >> /etc/apt/sources.list.d/postgresql.list' && \
+        sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" >> /etc/apt/sources.list.d/postgresql.list' && \
         apt-get update && \
-        apt-get install -y \
+        DEBIAN_FRONTEND=noninteractive apt-get install -y \
                 barman \
                 postgresql-client-10
 
