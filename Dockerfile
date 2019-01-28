@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 # We need python for our scripts as well as for barman.  It's put
 # first because this also downloads wget which we need to get the gpg
