@@ -5,9 +5,10 @@ echo "*** Pulling montagu-db image to complete restore"
 docker pull vimc/montagu-db:master
 
 echo "*** Running postgres on restore volume"
-CONTAINER_ID=$(docker run -d --rm \
-       -v montagu_db_volume:/pgdata vimc/montagu-db:master \
-       /etc/montagu/postgresql.production.conf)
+CONTAINER_ID=$(docker run --rm \
+                      -e PGDATA=/pgdata/.incoming \
+                      -v montagu_db_volume:/pgdata vimc/montagu-db:master \
+                      /etc/montagu/postgresql.production.conf)
 function cleanup {
     set +e
     echo "*** Stopping container"
