@@ -6,5 +6,5 @@ CONTAINER_ID=$(docker run -d --rm \
        /etc/montagu/postgresql.production.conf)
 docker exec -it $CONTAINER_ID montagu-wait.sh 3600
 docker exec -it $CONTAINER_ID bash -c \
-  "date --iso-8601=seconds > /nightly/.last-restore"
+  "date --iso-8601=seconds > /pgdata/.last-restore"
 docker stop $CONTAINER_ID
