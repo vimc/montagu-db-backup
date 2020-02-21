@@ -82,8 +82,30 @@ def recover(id, wipe_first):
 
 def update_nightly():
     barman = get_barman_container()
-    exec_safely(barman, ["update-nightly", DATABASE_NAME],
+    print("Dumping backup into nightly volume")
+    exec_safely(barman, ["barman", "recover", DATABASE_NAME, "latest",
+                         "/nightly/.incoming"],
                 stream=True, check=True)
+    migrate_nightly()
+    exec_safely(barman, ["update-nightly"], stream=True, check=True)
+
+
+def migrate_nightly():
+    image = "vimc/montagu-db:master"
+    d = docker.client.from_env()
+    print("Running postgres on restored files")
+    img = d.images.pull(image)
+    try:
+        env = {"PGDATA": "/pgdata/.incoming"}
+        config = "/etc/montagu/postgresql.production.conf"
+        volumes = {BARMAN_VOLUMES["nightly"]["volume"]: {"bind": "/pgdata"}}
+        container = d.containers.run(img, config, detach=True, environment=env,
+                                     volumes=volumes)
+        print("Waiting for db to complete recovery")
+        exec_safely(container, ["montagu-wait.sh", "3600"], check=True)
+    finally:
+        container.stop()
+        container.remove()
 
 
 def wipe_recover(barman=None):
