@@ -5,6 +5,10 @@ approach we are using is becoming painful.  Downloading from S3 takes quite a
 while (especially verification with duplicati) and the restore (`pg_restore`)
 takes a long time to rebuild the indices.
 
+## Design
+
+See [`design.md`](design.md) for a description of the system with less archaelogical content.
+
 ## Deployment
 
 Barman is running on `annex.montagu.dide.ic.ac.uk` as container `montagu-barman`
