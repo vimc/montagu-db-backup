@@ -34,6 +34,8 @@ barman-montagu barman backup montagu
 
 This has implications for cleanup though, as our retention policy guarantees only the last 3 backups will be saved.
 
+On annex, running `barman-montagu status` will print information about the status including the number and timings of backups.
+
 ### Off-site backup
 
-Our backup system copies the starport volume into AWS.  There is also a second copy of barman running there.
+Our backup system copies the starport volume into AWS.  There is also a second copy of barman running there.  The AWS setup is described [in the `aws` directory](aws).
