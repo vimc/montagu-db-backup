@@ -13,13 +13,14 @@ The overall process is described in diagram form [here](https://github.com/vimc/
 
 The basic approach (without any real reference to the wrinkles that will appear below) is:
 
-1. On annex, `barman` dumps out a recovery directory (this is a base backup plus the WAL) using `barman recover` into the `montagu_db_volume` volume - this is our "nightly backup" and is controlled by cron so is error prone, and may stop running without warning.
-2. On annex, `bb8` ships this into the starport using `bb8 backup`, updating the directory on disk `~/starport/barman_to_starport` (this is the only backup target _from_ annex, even though everything else gets sent there).
-3. On science `bb8 restore` copies the contents of the starport barman into the `montagu_db_volume` container, then starts montagu; when the db starts it performs a recovery on this volume (which currently takes about an hour)
+1. On annex, `barman` dumps out a recovery directory (this is a base backup plus the WAL) using `barman recover` into the `montagu_db_volume` volume - this is our "nightly backup".
+2. On annex, The nightly backup is then run through a copy of Postgres, using `vimc/montagu-db:latest`, so that the database is fully recovered (`barman revover` dumps the data that Postgres *can* restore, but it takes time for the WAL to be replayed over the base backup)
+3. On annex, `bb8` ships this into the starport using `bb8 backup`, updating the directory on disk `~/starport/barman_to_starport` (this is the only backup target _from_ annex, even though everything else gets sent there).
+4. On science (or another machine being restored) `bb8 restore` rsync's the contents of the starport barman into the `montagu_db_volume` container, then starts montagu.
 
-A base backup will take ~2hrs (as of 2020-02-20) and currently requires ~220GB.  If there are significant quantities of WAL logs then it will take longer.
+A base backup will take ~2hrs (as of 2020-02-20) and currently requires ~220GB.  If there are significant quantities of WAL logs then it will take longer.  Replaying the WAL can take up to an hour.
 
-Steps 1-2 are done using a cron script that lives in the bb8 repo `schedule-barman-montagu-nightly`
+Steps 1-3 are done using a cron script that lives in the bb8 repo `schedule-barman-montagu-nightly`.  This cron job can and has stopped without warning in the past - most recently when the Python installation disappeared during an Ubuntu upgrade.
 
 bb8 takes control of the actual process of preparing the recovery volume.  It writes out a cron nightly script that runs the barman `update-nightly` script and then `bb8 backup`
 
