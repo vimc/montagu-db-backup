@@ -14,7 +14,7 @@ The overall process is described in diagram form [here](https://github.com/vimc/
 The basic approach (without any real reference to the wrinkles that will appear below) is:
 
 1. On annex, `barman` dumps out a recovery directory (this is a base backup plus the WAL) using `barman recover` into the `montagu_db_volume` volume - this is our "nightly backup".
-2. On annex, The nightly backup is then run through a copy of Postgres, using `vimc/montagu-db:latest`, so that the database is fully recovered (`barman revover` dumps the data that Postgres *can* restore, but it takes time for the WAL to be replayed over the base backup)
+2. On annex, The nightly backup is then run through a copy of Postgres, using `vimc/montagu-db:latest`, so that the database is fully recovered (`barman revover` dumps the data that Postgres *can* restore, but it takes time for the WAL to be replayed over the base backup) - we're calling this step "replay wal"
 3. On annex, `bb8` ships this into the starport using `bb8 backup`, updating the directory on disk `~/starport/barman_to_starport` (this is the only backup target _from_ annex, even though everything else gets sent there).
 4. On science (or another machine being restored) `bb8 restore` rsync's the contents of the starport barman into the `montagu_db_volume` container, then starts montagu.
 

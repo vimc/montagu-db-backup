@@ -86,11 +86,11 @@ def update_nightly():
     exec_safely(barman, ["barman", "recover", DATABASE_NAME, "latest",
                          "/nightly/.incoming"],
                 stream=True, check=True)
-    migrate_nightly()
+    replay_wal_nightly()
     exec_safely(barman, ["update-nightly"], stream=True, check=True)
 
 
-def migrate_nightly():
+def replay_wal_nightly():
     image = "vimc/montagu-db:master"
     d = docker.client.from_env()
     print("Running postgres on restored files")
