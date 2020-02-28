@@ -2,7 +2,7 @@
 # Cold HDD - Lowest cost HDD volume
 volume_type = 'sc1'
 
-# GB, lowest value for sc1
+# GB, 500 is the lowest value for sc1
 volume_size = 1500
 
 # https://aws.amazon.com/ec2/instance-types/
