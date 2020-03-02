@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+set -e
+echo $(date --rfc-3339=ns) > /nightly/.barman-last-restore
