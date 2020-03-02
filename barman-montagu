@@ -82,12 +82,13 @@ def recover(id, wipe_first):
 
 def update_nightly():
     barman = get_barman_container()
+    wipe_recover(barman)
     print("Dumping backup into nightly volume")
     exec_safely(barman, ["barman", "recover", DATABASE_NAME, "latest",
-                         "/nightly/.incoming"],
+                         "/nightly/"],
                 stream=True, check=True)
     replay_wal_nightly()
-    exec_safely(barman, ["update-nightly"], stream=True, check=True)
+    exec_safely(barman, ["write-nightly-timestamp"], stream=True, check=True)
 
 
 def replay_wal_nightly():
@@ -96,7 +97,6 @@ def replay_wal_nightly():
     print("Running postgres on restored files")
     img = d.images.pull(image)
     try:
-        env = {"PGDATA": "/pgdata/.incoming"}
         config = "/etc/montagu/postgresql.production.conf"
         volumes = {BARMAN_VOLUMES["nightly"]["volume"]: {"bind": "/pgdata"}}
         container = d.containers.run(img, config, detach=True, environment=env,
