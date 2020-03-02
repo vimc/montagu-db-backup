@@ -20,9 +20,8 @@ The basic approach (without any real reference to the wrinkles that will appear 
 
 A base backup will take ~2hrs (as of 2020-02-20) and currently requires ~220GB.  If there are significant quantities of WAL logs then it will take longer.  Replaying the WAL can take up to an hour.
 
-Steps 1-3 are done using a cron script that lives in the bb8 repo `schedule-barman-montagu-nightly`.  This cron job can and has stopped without warning in the past - most recently when the Python installation disappeared during an Ubuntu upgrade (but see [Logging](#Logging) below).
+Steps 1-3 are done using a cron script that lives in the montagu-bb8 repo `schedule-barman-montagu-nightly`.  This cron job can and has stopped without warning in the past - most recently when the Python installation disappeared during an Ubuntu upgrade (but see [Logging](#Logging) below).
 
-bb8 takes control of the actual process of preparing the recovery volume.  It writes out a cron nightly script that runs the barman `update-nightly` script and then `bb8 backup`
 
 ### Base-backups
 
