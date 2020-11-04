@@ -18,7 +18,7 @@ else
 fi
 
 
-REGISTRY=docker
+REGISTRY=vimc
 NAME=montagu-barman
 
 APP_DOCKER_TAG=$REGISTRY/$NAME
