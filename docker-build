@@ -1,14 +1,28 @@
 #!/usr/bin/env bash
 set -e
 
-GIT_ID=$(git rev-parse --short=7 HEAD)
-GIT_BRANCH=$(git symbolic-ref --short HEAD)
-REGISTRY=docker.montagu.dide.ic.ac.uk:5000
-PUBLIC_REGISTRY=vimc
+# Buildkite doesn't check out a full history from the remote (just the
+# single commit) so you end up with a detached head and git rev-parse
+# doesn't work
+if [ "$BUILDKITE" = "true" ]; then
+    GIT_SHA=${BUILDKITE_COMMIT:0:7}
+else
+    GIT_SHA=$(git rev-parse --short=7 HEAD)
+fi
+
+
+if [ "$BUILDKITE" = "true" ]; then
+    GIT_BRANCH=$BUILDKITE_BRANCH
+else
+    GIT_BRANCH=$(git symbolic-ref --short HEAD)
+fi
+
+
+REGISTRY=docker
 NAME=montagu-barman
 
 APP_DOCKER_TAG=$REGISTRY/$NAME
-APP_DOCKER_COMMIT_TAG=$REGISTRY/$NAME:$GIT_ID
+APP_DOCKER_COMMIT_TAG=$REGISTRY/$NAME:$GIT_SHA
 APP_DOCKER_BRANCH_TAG=$REGISTRY/$NAME:$GIT_BRANCH
 
 docker build --pull \
@@ -18,9 +32,3 @@ docker build --pull \
 
 docker push $APP_DOCKER_BRANCH_TAG
 docker push $APP_DOCKER_COMMIT_TAG
-
-if [[ $GIT_BRANCH == "master" ]]; then
-    PUBLIC_TAG=$PUBLIC_REGISTRY/$NAME:master
-    docker tag $APP_DOCKER_BRANCH_TAG $PUBLIC_TAG
-    docker push $PUBLIC_TAG
-fi

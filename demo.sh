@@ -38,7 +38,7 @@ docker run --rm -d \
        --network pg_nw \
        -p 5435:5432 \
        -v db_data:/pgdata \
-       docker.montagu.dide.ic.ac.uk:5000/montagu-db:i1333
+       vimc/montagu-db:master
 docker exec db montagu-wait.sh
 
 ## This is something that needs to be done at the right place in each
@@ -53,7 +53,7 @@ docker exec db enable-replication.sh changeme changeme
 
 ## Or, put at least one transaction worth of data in:
 docker run --rm --network=pg_nw \
-       docker.montagu.dide.ic.ac.uk:5000/montagu-migrate:i1333
+       vimc/montagu-migrate:master
 
 
 ## Get barman up
@@ -62,7 +62,7 @@ docker run -d --rm \
        --network pg_nw \
        -v barman_data:/var/lib/barman \
        -v barman_recover:/recover \
-       docker.montagu.dide.ic.ac.uk:5000/montagu-barman:i1333
+       vimc/montagu-barman:master
 
 docker exec barman_container setup-barman
 
@@ -79,7 +79,7 @@ docker exec barman_container recover-last
 docker run --rm -d \
        --name db_recovered \
        -v barman_recover:/pgdata \
-       docker.montagu.dide.ic.ac.uk:5000/montagu-db:i1333
+       vimc/montagu-db:master
 docker exec db_recovered montagu-wait.sh
 docker exec db_recovered \
        psql -U vimc -d montagu -c \
@@ -95,12 +95,12 @@ docker run --rm \
        --entrypoint recover-last-no-server \
        -v barman_data:/var/lib/barman \
        -v barman_recover:/recover \
-       docker.montagu.dide.ic.ac.uk:5000/montagu-barman:i1333
+       vimc/montagu-barman:master
 
 docker run --rm -d \
        --name db_recovered \
        -v barman_recover:/pgdata \
-       docker.montagu.dide.ic.ac.uk:5000/montagu-db:i1333
+       vimc/montagu-db:master
 docker exec db_recovered montagu-wait.sh
 docker exec db_recovered \
        psql -U vimc -d montagu -c \

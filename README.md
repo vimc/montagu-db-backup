@@ -47,8 +47,7 @@ Usage:
 Options:
   --password-group=<group>  Password group [default: production]
   --image-tag=<tag>         Barman image tag [default: master]
-  --image-source=<repo>     The Docker registry to pull from [default:
-  docker.montagu.dide.ic.ac.uk:5000]
+  --image-source=<repo>     The Docker registry to pull from [default: vimc]
   --pull-image              Pull image before running?
   --no-clean-on-error       Don't clean up container/volumes on error
   --slot=<slot>             Replication slot to use on the db
