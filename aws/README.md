@@ -42,4 +42,53 @@ general.
    docker exec barman-montagu setup-barman
    ```
 
+## Deleting failed backups
 
+Get onto the aws machine with:
+
+```
+./aws-barman ssh
+```
+
+```
+cd barman/montagu-db-backup
+```
+
+Confirm the problem
+
+```
+./barman-montagu barman -- check montagu
+```
+
+where you may see
+
+```
+        failed backups: FAILED (there are 1 failed backups)
+```
+
+
+```
+./barman-montagu barman -- list-backup montagu
+```
+
+which will show something like
+
+```
+montagu 20201101T000001 - Mon Nov  2 05:49:25 2020 - Size: 345.4 GiB - WAL Size: 0 B
+montagu 20201001T010001 - FAILED
+montagu 20200901T010001 - Wed Sep  2 03:50:09 2020 - Size: 324.4 GiB - WAL Size: 31.7 GiB
+montagu 20200804T110556 - Wed Aug  5 15:46:30 2020 - Size: 325.9 GiB - WAL Size: 2.0 GiB
+montagu 20200701T010001 - Wed Jul  1 01:14:43 2020 - Size: 301.6 GiB - WAL Size: 32.2 GiB
+```
+
+Delete the offending backup
+
+```
+./barman-montagu barman -- delete montagu 20201001T010001
+```
+
+Verify:
+
+```
+./barman-montagu barman -- check montagu
+```

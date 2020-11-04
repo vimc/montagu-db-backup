@@ -1,0 +1,3 @@
+steps:
+  - label: ":whale: Build"
+    command: docker-build

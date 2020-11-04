@@ -5,10 +5,13 @@ FROM ubuntu:18.04
 # key from the postgres deb repo
 RUN apt-get update && \
         apt-get install -y --no-install-recommends \
+                build-essential \
                 git \
                 gnupg2 \
+                python3-dev \
                 python3-pip \
                 python3-setuptools \
+                python3-wheel \
                 wget
 
 # Setting TZ here is necessary to stop apt interactively prompting for
