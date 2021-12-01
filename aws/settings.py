@@ -9,7 +9,17 @@ volume_size = 1500
 instance_type = 't2.nano'
 
 # Ubuntu 16.04
-machine_image = 'ami-587b9e3f'
+# To find images, you can use the AWS interface:
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/usingsharedamis-finding.html
+# the image that we use has
+# root device type ebs
+# virtualisation type hvm
+# arch x86_64 (same as amd64?)
+#
+# There's a similar interface here which shows just ubuntu images,
+# which is what I used to track down this id:
+# https://cloud-images.ubuntu.com/locator/ec2/
+machine_image = 'ami-0f9124f7452cdb2a6'
 
 # Stored in vault at secret/backup/ec2/montagu-barman-keypair
 # Created with `aws ec2 create-key-pair --key-name montagu-barman`
