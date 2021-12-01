@@ -37,4 +37,11 @@ swapon /var/swap.1
 fstab_line="/var/swap.1   swap    swap    defaults        0   0"
 echo $fstab_line | sudo tee --append /etc/fstab
 
+# At the moment, because we have an ancient version of debian, we need
+# to make sure we get a fairly old version of the docker
+# package. Amazingly pip will download a version that this version of
+# python can't use, even though that is stated in the package
+# metadata.
+pip3 install docker==5.0.0 six
+
 echo "ready" > /home/ubuntu/go_signal
