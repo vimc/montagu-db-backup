@@ -19,7 +19,7 @@ class BarmanInstance(object):
     def exists(self):
         return self.instance
 
-    def start(self):
+    def start(self, stop_on_error=True):
         if self.instance:
             raise Exception("Cannot start another instance: already running")
 
@@ -30,7 +30,8 @@ class BarmanInstance(object):
             self.run_barman()
         except Exception:
             print("-" * 76)
-            self.stop()
+            if stop_on_error:
+                self.stop()
             raise
 
     def wait_for_startup(self):

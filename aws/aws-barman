@@ -57,7 +57,7 @@ if __name__ == '__main__':
     instance_name = args["<name>"] or "montagu-barman"
     instance = BarmanInstance(instance_name)
     if args["start"]:
-        instance.start()
+        instance.start(not args["--no-stop-on-error"])
     elif args["status"]:
         status()
     elif args["stop"]:

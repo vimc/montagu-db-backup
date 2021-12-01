@@ -10,7 +10,9 @@ git clone --recursive https://github.com/vimc/montagu-db-backup
 cd montagu-db-backup
 git checkout master
 git submodule init && git submodule update
+
 pip3 install -r requirements.txt
+pip3 install docker==5.0.0 six
 
 # http://www.harding.motd.ca/autossh/README.txt
 # autossh monitors the SSH connection and restarts it if it drops
