@@ -4,6 +4,7 @@ set -ex
 WORKDIR=$(mktemp -d)
 
 function finish {
+    set +e
     rm -rf $WORKDIR
 }
 trap finish EXIT
