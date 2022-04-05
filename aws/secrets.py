@@ -18,22 +18,22 @@ class AWSVaultClient(VaultClient):
         The instance is set up to trust this key by the KeyName parameter in
         create_instance. Amazon holds the public key and is able to inject it
         into authorized_keys on each new instance."""
-        return self.read_secret('secret/backup/ec2/montagu-barman-keypair',
+        return self.read_secret('secret/vimc/backup/ec2/montagu-barman-keypair',
                                 field='KeyMaterial')
 
     @property
     def target_private_key(self):
         """Returns the key that the ec2 instance uses to SSH to production."""
-        return self.read_secret('secret/backup/ec2/target-keypair',
+        return self.read_secret('secret/vimc/backup/ec2/target-keypair',
                                 field='KeyMaterial')
 
     @property
     def target_host_key(self):
         """Returns the public key of the production machine"""
-        return self.read_secret('secret/backup/ec2/target-host-key')
+        return self.read_secret('secret/vimc/backup/ec2/target-host-key')
 
     def get_password(self, user):
-        return self.read_secret('secret/database/production/users/{}'.format(
+        return self.read_secret('secret/vimc/database/production/users/{}'.format(
             user), field='password')
 
     def get_barman_passwords(self):

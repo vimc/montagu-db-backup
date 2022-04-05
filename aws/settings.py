@@ -11,7 +11,7 @@ instance_type = 't2.nano'
 # Ubuntu 16.04
 machine_image = 'ami-587b9e3f'
 
-# Stored in vault at secret/backup/ec2/montagu-barman-keypair
+# Stored in vault at secret/vimc/backup/ec2/montagu-barman-keypair
 # Created with `aws ec2 create-key-pair --key-name montagu-barman`
 key_name = 'montagu-barman'
 
