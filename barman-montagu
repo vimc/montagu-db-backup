@@ -35,7 +35,7 @@ import docopt
 import hvac
 
 # These defaults are all fairly montagu specific
-DEFAULT_VAULT_ADDR = "https://support.montagu.dide.ic.ac.uk:8200"
+DEFAULT_VAULT_ADDR = "https://vault.dide.ic.ac.uk:8200"
 BARMAN_CONTAINER = 'barman-montagu'
 # The 'volume' element is the name of the volume (so can be adjusted)
 # but the 'path' element corresponds to a path within the container
@@ -194,7 +194,7 @@ def get_barman_passwords(password_group):
                 return password
             else:
                 vault = vault_client()
-                path = "secret/database/{}/users/{}".format(password_group, user)
+                path = "secret/vimc/database/{}/users/{}".format(password_group, user)
                 return vault.read(path)['data']['password']
 
     return {x: get_password(x) for x in users}
