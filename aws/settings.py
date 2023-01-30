@@ -8,8 +8,8 @@ volume_size = 1500
 # https://aws.amazon.com/ec2/instance-types/
 instance_type = 't2.nano'
 
-# Ubuntu 16.04
-machine_image = 'ami-587b9e3f'
+# Ubuntu 20.04
+machine_image = 'ami-00de6c6491fdd3ef5'
 
 # Stored in vault at secret/vimc/backup/ec2/montagu-barman-keypair
 # Created with `aws ec2 create-key-pair --key-name montagu-barman`
