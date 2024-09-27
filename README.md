@@ -1,38 +1,32 @@
 # Montagu DB backup
 
-As the database has grown (from a few 10s of MB up to GB) the dump-and-restore
-approach we are using is becoming painful.  Downloading from S3 takes quite a
-while (especially verification with duplicati) and the restore (`pg_restore`)
-takes a long time to rebuild the indices.
+These docs remain curent for the next little bit until we give up on the db for most data, after which we will probably explore dump-and-restore again.  Doing much with these backups is a nuisance and quite slow in practice.
 
-## Design
+This doc dates from the setup of annex2 after moving production2.  All archaeological content has been removed, but git history is available.
 
-See [`design.md`](design.md) for a description of the system with less archaelogical content.
+## Overall design
+
+Our primary database sits on `production2.montagu.dide.ic.ac.uk` on port 5432 (behind the VPN).  It uses streaming replication to stream to a [barman](https://www.pgbarman.org/) instance on `annex2.montagu.dide.ic.ac.uk`.
+
+Two concepts are important:
+
+1. a **base backup** is a snapshot of the postgres database at some point in time
+2. the **WAL (Write Ahead Log)** which can be replayed from a base backup to the present to restore the current database state
 
 ## Deployment
 
-Barman is running on `annex.montagu.dide.ic.ac.uk` as container `montagu-barman`
+Barman is running on `annex2.montagu.dide.ic.ac.uk` as container `montagu-barman`
 
 ```
-git clone https://github.com/vimc/montagu-db-backup
+git clone --recursive https://github.com/vimc/montagu-db-backup
 cd montagu-db-backup
-pip3 install -r requirements.txt
+pip3 install --user -r requirements.txt
 ```
-
-Then install the command with
-
-```
-sudo ./install
-```
-
-which sets up a `barman-montagu` command that can be used from anywhere on the
-computer that refers to the configuration in *this* directory (you can also use
-`./barman-montagu` and avoid installing).
 
 Then you can interact with the barman container the `barman-montagu` command:
 
 ```
-$ barman-montagu --help
+$ ./barman-montagu --help
 Set up and use barman (Postgres streaming backup) for montagu
 
 Usage:
@@ -61,6 +55,11 @@ To set up barman:
 
 ```
 barman-montagu setup --pull-image --slot barman production.montagu.dide.ic.ac.uk
+./start-metrics.sh       # Exposes Prometheus metrics on port 5000
+```
+
+```
+barman-montagu setup --pull-image --slot barman production2.montagu.dide.ic.ac.uk
 ./start-metrics.sh       # Exposes Prometheus metrics on port 5000
 ```
 
@@ -107,9 +106,11 @@ instance_name. And if they are tracking different databases they will also
 differ by database.
 
 ### Tests
+
 To test the metrics Flask app, run
+
 ```
-cd ./backup/metrics
+cd ./cached-metrics
 sudo -H  pip3 install -r ./bin/requirements.txt
 sudo -H  pip3 install -r ./bin/requirements-dev.txt
 pytest
@@ -297,3 +298,8 @@ barman-montagu setup --pull-image localhost
 ```
 
 (you may want to specify `--image-tag` too to run the branch you're working on).
+
+
+
+```
+```

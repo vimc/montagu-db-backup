@@ -1,3 +1,3 @@
 steps:
   - label: ":whale: Build"
-    command: docker-build
+    command: docker/docker-build

@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-DEST=/recover
-DB=montagu
-
-setup-barman --no-verify
-barman recover $DB "latest" $DEST
