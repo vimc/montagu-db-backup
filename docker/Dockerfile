@@ -36,7 +36,7 @@ RUN install -d /usr/share/postgresql-common/pgdg && \
 
 # This is a peculiar way of "installing" python packages that I do not
 # have the energy to refactor right now.
-ENV METRICS_UTILS_REF 4b2ef9b
+ENV METRICS_UTILS_REF=4b2ef9b
 RUN git clone https://github.com/vimc/metrics-utils /tmp/metrics_utils && \
         git -C /tmp/metrics_utils reset --hard $METRICS_UTILS_REF && \
         rm -rf /tmp/metrics_utils/.git && \
