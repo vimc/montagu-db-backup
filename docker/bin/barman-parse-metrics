@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+"""Usage:
+  barman-parse-metrics <path>
+"""
+
+import docopt
+import json
+import os
+import re
+import tempfile
+
+from datetime import datetime, timezone
+from dateutil import parser
+
+from metrics_utils.metrics import parse_timestamp, seconds_elapsed_since
+
+
+def clean_key(k, prefix):
+    return prefix + re.sub("[^A-Za-z0-9]+", "_", k)
+
+
+def parse_size(s):
+    d = s.split(" ")
+    size_name = {"B": 0, "KiB": 10, "MiB": 20, "GiB": 30, "TiB": 40}
+    return float(d[0]) * 2**size_name[d[1]]
+
+
+def parse_last_backup_age(s):
+    last_available = parse_timestamp(s)
+    if last_available:
+        since_last_backup = seconds_elapsed_since(last_available.timestamp())
+        return {
+            "barman_time_of_last_backup": last_available.timestamp(),
+            "barman_time_since_last_backup_seconds": since_last_backup,
+            "barman_time_since_last_backup_minutes": since_last_backup / 60,
+            "barman_time_since_last_backup_hours": since_last_backup / 3600,
+            "barman_time_since_last_backup_days":
+            since_last_backup / (3600 * 24)
+        }
+    else:
+        return {}
+
+
+def parse_status(path):
+    check = barman_output_as_dict(read_lines(path + '/check.txt'))
+    status = barman_output_as_dict(read_lines(path + '/status.txt'))
+    ret = {clean_key(k, "barman_check_"): int(v.startswith("OK"))
+           for (k, v) in check.items()}
+    ret["barman_ok"] = int(all(x == 1 for x in ret.values()))
+    ret["barman_running"] = 1
+    ret["barman_metrics_ok"] = 1
+    ret["barman_data_size"] = parse_size(status["Current data size"])
+    pg_version = status["PostgreSQL version"].split(".")
+    ret["pg_version_major"] = int(pg_version[0])
+    ret["pg_version_minor"] = int(pg_version[1])
+    ret["barman_available_backups"] = int(status["No. of available backups"])
+    ret.update(parse_last_backup_age(status["Last available backup"]))
+    return ret
+
+
+def save_metrics(data, path):
+    now = datetime.now(timezone.utc)
+    utc_seconds = now.timestamp()
+    utc_string = now.isoformat()
+    ret = {"utc_seconds": utc_seconds, "utc_string": utc_string, "data": data}
+    dest = path + "/metrics.json"
+    # Atomic write
+    with tempfile.NamedTemporaryFile(mode='w', dir=path, delete=False) as f:
+        f.write(json.dumps(ret))
+    os.replace(f.name, dest)
+
+
+def barman_output_as_dict(text):
+    lines = text.split("\n")[1:]
+    raw_values = {}
+    for line in lines:
+        if line:
+            k, v = line.split(": ", 1)
+            raw_values[k.strip()] = v.strip()
+    return raw_values
+
+
+def read_lines(filename):
+    with open(filename, "r") as f:
+        return f.read()
+
+
+if __name__ == "__main__":
+    args = docopt.docopt(__doc__)
+    path = args['<path>']
+    try:
+        dat = parse_status(path)
+    except Exception as e:
+        # This is an expected failure mode - if the files are not
+        # present then one of the barman commands failed to run and
+        # barman is no longer reporting things properly.
+        barman_running = type(e) != FileNotFoundError
+        dat = {"barman_metrics_ok": 1,
+               "barman_running": barman_running,
+               "barman_ok": 0}
+        print("Error while parsing barman status:")
+        print(e)
+    save_metrics(dat, path)
