@@ -177,7 +177,7 @@ def vault_client():
         vault_token = input().strip()
     vault = hvac.Client(url=vault_url)
     print("Authenticating vault with GitHub")
-    vault.auth_github(vault_token)
+    vault.auth.github.login(vault_token)
     return vault
 
 

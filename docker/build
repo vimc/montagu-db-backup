@@ -28,7 +28,7 @@ APP_DOCKER_BRANCH_TAG=$REGISTRY/$NAME:$GIT_BRANCH
 docker build --pull \
        --tag $APP_DOCKER_COMMIT_TAG \
        --tag $APP_DOCKER_BRANCH_TAG \
-       .
+       docker
 
-docker push $APP_DOCKER_BRANCH_TAG
-docker push $APP_DOCKER_COMMIT_TAG
+# docker push $APP_DOCKER_BRANCH_TAG
+# docker push $APP_DOCKER_COMMIT_TAG
