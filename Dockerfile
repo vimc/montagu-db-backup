@@ -19,8 +19,10 @@ RUN apt-get update && \
     python3-wheel \
     wget
 
-RUN /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y &&
-  apt-get install -y --no-install-recommends postgresql-client-17
+RUN /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y && \
+    apt-get install -y --no-install-recommends \
+    barman \
+    postgresql-client-17
 
 RUN pipx install yacron
 
