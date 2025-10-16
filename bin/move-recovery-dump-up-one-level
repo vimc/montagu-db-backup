@@ -10,4 +10,4 @@ set -e
 # > because it's the mount point).
 
 mv $(find /recover/dump -maxdepth 1 -mindepth 1) /recover
-rmdir /recover
+rmdir /recover/dump
