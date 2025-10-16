@@ -61,8 +61,14 @@ To set up barman:
 
 ```
 barman-montagu setup --pull-image --slot barman production2.montagu.dide.ic.ac.uk
-./start-metrics.sh       # Exposes Prometheus metrics on port 5000
 ```
+
+You can avoid the initial backup by running
+
+```
+barman-montagu setup --pull-image --slot barman --no-initial-backup production2.montagu.dide.ic.ac.uk
+```
+
 
 Or, for local testing you would want:
 

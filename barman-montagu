@@ -159,7 +159,7 @@ def setup(host, slot, password_group, tag, registry, pull, clean_on_error, no_in
         d.images.pull(image_name)
     volumes = [volume_create(v, d) for v in named_volumes()]
     args = ["--no-initial-backup"] if no_initial_backup else []
-    barman = d.containers.run(image_name, args=args, name=BARMAN_CONTAINER, detach=True,
+    barman = d.containers.run(image_name, command=args, name=BARMAN_CONTAINER, detach=True,
                               volumes=volume_mappings, environment=environment,
                               extra_hosts=extra_hosts, network=network,
                               restart_policy={"Name": "always"})
