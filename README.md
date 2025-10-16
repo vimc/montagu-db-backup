@@ -60,7 +60,7 @@ container that is called `barman-montagu`
 To set up barman:
 
 ```
-barman-montagu setup --pull-image --slot barman production.montagu.dide.ic.ac.uk
+barman-montagu setup --pull-image --slot barman production2.montagu.dide.ic.ac.uk
 ./start-metrics.sh       # Exposes Prometheus metrics on port 5000
 ```
 
