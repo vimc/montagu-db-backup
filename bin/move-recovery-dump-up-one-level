@@ -1,0 +1,13 @@
+#!/usr/bin/bash
+set -e
+# This is an unfortunate script that we do not want to have, it works
+# around barman: from montagu-config:scripts/anne-dump-montagu-db:
+#
+# > Now we need a sensible way of copying all the files from
+# > /recover/dump into /recover, then deleting the /recover/dump
+# > directory, working around the problem that barman now tries to
+# > delete the directory that it recovers into (which it can't do here
+# > because it's the mount point).
+
+mv $(find /recover/dump -maxdepth 1 -mindepth 1) /recover
+rmdir /recover
