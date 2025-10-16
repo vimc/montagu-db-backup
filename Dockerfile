@@ -25,7 +25,7 @@ RUN /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y && \
     barman \
     postgresql-client-17
 
-RUN pipx install yacron
+RUN pipx install yacron && pipx ensurepath
 
 # This will require some attention.
 # ENV METRICS_UTILS_REF=4b2ef9b
