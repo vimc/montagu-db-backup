@@ -24,6 +24,7 @@ Options:
                             [default: barman_recover]
   --volume_nightly<volume>  Volume name or path for nightly recover
                             [default: montagu_db_volume]
+  --no-initial-backup       Skip initial backup after setup
 """
 
 import os
@@ -123,7 +124,7 @@ def destroy():
         volume_remove(v['volume'], d)
 
 
-def setup(host, slot, password_group, tag, registry, pull, clean_on_error):
+def setup(host, slot, password_group, tag, registry, pull, clean_on_error, no_initial_backup):
     d = docker.client.from_env()
     barman = get_barman_container(error=False)
     if barman:
@@ -157,7 +158,8 @@ def setup(host, slot, password_group, tag, registry, pull, clean_on_error):
         print("Pulling image...")
         d.images.pull(image_name)
     volumes = [volume_create(v, d) for v in named_volumes()]
-    barman = d.containers.run(image_name, name=BARMAN_CONTAINER, detach=True,
+    args = ["--no-initial-backup"] if no_initial_backup else []
+    barman = d.containers.run(image_name, args=args, name=BARMAN_CONTAINER, detach=True,
                               volumes=volume_mappings, environment=environment,
                               extra_hosts=extra_hosts, network=network,
                               restart_policy={"Name": "always"})
@@ -293,7 +295,8 @@ def main():
               tag=args['--image-tag'],
               registry=args['--image-source'],
               pull=args['--pull-image'],
-              clean_on_error=not args['--no-clean-on-error'])
+              clean_on_error=not args['--no-clean-on-error'],
+              no_initial_backup=args["--no-initial-backup"])
     elif args['status']:
         status()
     elif args['barman']:
