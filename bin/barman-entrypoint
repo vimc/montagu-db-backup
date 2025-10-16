@@ -5,4 +5,4 @@ echo "*** Configuring barman ***"
 setup-barman
 
 echo "*** Starting scheduler ***"
-yacron -c /schedule.yml
+/root/.local/bin/yacron/yacron -c /schedule.yml
