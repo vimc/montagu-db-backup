@@ -11,11 +11,11 @@ RUN apt-get update && \
     ca-certificates \
     git \
     gnupg2 \
+    pipx \
     postgresql-common \
     python3-dev \
     python3-docopt \
     python3-pip \
-    python3-pipx \
     python3-setuptools \
     python3-wheel \
     wget
